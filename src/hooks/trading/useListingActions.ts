@@ -51,7 +51,8 @@ export const useListingActions = (listings: ListingItem[], setListings: React.Di
         .insert({
           report_type: 'listing',
           details: JSON.stringify(structuredDetails),
-          reporter_id: (await supabase.auth.getUser()).data.user?.id || null
+          reporter_id: (await supabase.auth.getUser()).data.user?.id || null,
+          status: 'pending'
         });
         
       if (reportError) throw reportError;

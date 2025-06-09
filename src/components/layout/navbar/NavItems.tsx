@@ -2,9 +2,11 @@ import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRole } from "@/contexts/RoleContext";
 
 export const NavItems = () => {
   const { session } = useAuth();
+  const { role, loading } = useRole();
   const location = useLocation();
 
   // Define navigation items
@@ -19,10 +21,17 @@ export const NavItems = () => {
     { to: "/news", label: "News", public: true },
   ];
 
+  // Add Dashboard link for admin users
+  if (role === 'admin') {
+    navItems.push({ to: "/admin", label: "Dashboard", requiresAuth: true });
+  }
+
   // Filter items based on authentication status
   const filteredItems = navItems.filter(
     item => (item.public || (item.requiresAuth && session))
   );
+
+  if (loading) return null; // or a spinner
 
   return (
     <div className="flex items-center gap-1 md:gap-2">

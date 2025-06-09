@@ -17,7 +17,8 @@ type ClassifiedRow = {
   title: string;
   description: string | null;
   price: number | null;
-  contact_info: string | null;
+  email: string | null;
+  phone_number: string | null;
   image_url: string | null;
   user_id: string | null;
   created_at: string | null;
@@ -84,7 +85,8 @@ const Classifieds = () => {
             title: formData.title,
             description: formData.description,
             price: formData.price,
-            contact_info: formData.contactInfo,
+            email: formData.email,
+            phone_number: formData.phoneNumber,
             image_url: formData.imageUrl
           })
           .eq('id', editItem.id);
@@ -101,7 +103,8 @@ const Classifieds = () => {
             title: formData.title,
             description: formData.description,
             price: formData.price,
-            contact_info: formData.contactInfo,
+            email: formData.email,
+            phone_number: formData.phoneNumber,
             image_url: formData.imageUrl,
             user_id: session?.user.id
           });
