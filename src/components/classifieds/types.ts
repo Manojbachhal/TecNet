@@ -1,11 +1,11 @@
-
 export interface Classified {
   id: string;
   title: string;
   description: string | null;
   price: number | null;
-  contactInfo: string | null;
-  imageUrl: string | null;
+  email: string | null;
+  phone_number: string | null;
+  image_url: string | null;
   userId: string | null;
   createdAt: string;
   updatedAt: string | null;

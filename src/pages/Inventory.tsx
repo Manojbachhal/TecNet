@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -72,6 +71,12 @@ export default function Inventory() {
   
   const confirmDelete = async () => {
     if (!deleteItemId) return;
+    
+    const { error: deleteListingsError } = await supabase
+      .from('trading_listings')
+      .delete()
+      .eq('firearm_id', deleteItemId)
+      .eq('owner_id', user?.id);
     
     const success = await deleteItem(deleteItemId);
     if (success) {

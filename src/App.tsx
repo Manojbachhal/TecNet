@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import AdminProtectedRoute from "@/components/auth/AdminProtectedRoute";
+import StorageSetup from "@/components/StorageSetup";
+// import AdminProtectedRoute from "@/components/auth/AdminProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Inventory from "./pages/Inventory";
@@ -17,7 +18,6 @@ import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
 import News from "./pages/News";
 import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
 import Features from "./pages/Features";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
@@ -33,6 +33,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
+        <StorageSetup />
         <Toaster />
         <Sonner />
         <div className="content-container min-h-screen flex flex-col">
@@ -67,7 +68,7 @@ const App = () => (
                   } 
                 />
                 <Route 
-                  path="/rangefinder" 
+                  path="/range-finder" 
                   element={
                     <ProtectedRoute>
                       <RangeFinder />
@@ -106,14 +107,14 @@ const App = () => (
                     </ProtectedRoute>
                   } 
                 />
-                <Route 
+                {/* <Route 
                   path="/admin" 
                   element={
-                    <AdminProtectedRoute>
+                    <ProtectedRoute>
                       <Admin />
-                    </AdminProtectedRoute>
+                    </ProtectedRoute>
                   } 
-                />
+                /> */}
                 <Route path="/news" element={<News />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/help" element={<Help />} />

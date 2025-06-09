@@ -182,7 +182,7 @@ export const useTradingPage = () => {
           firearmId: item.firearm_id,
           reported: item.reported || false
         }));
-        setListings(transformedListings);
+        setListings(transformedListings as ListingItem[]);
       }
       
       return true;

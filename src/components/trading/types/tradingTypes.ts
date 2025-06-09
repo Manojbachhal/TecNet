@@ -1,4 +1,3 @@
-
 import { ReportData } from '../ReportListingDialog';
 
 export interface ListingItem {
@@ -19,6 +18,7 @@ export interface ListingItem {
   muzzleVelocity?: number;
   ballisticCoefficient?: number;
   reported?: boolean;
+  owner_id: string;
 }
 
 export interface TradingItemProps {

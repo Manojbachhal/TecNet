@@ -1,18 +1,15 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, MessageSquare, Crosshair, Trash2 } from "lucide-react";
+import { Edit, Crosshair, Trash2 } from "lucide-react";
 
 interface OwnerActionsProps {
   onEdit: () => void;
-  onContact: () => void;
   onViewBallistics: () => void;
   onDelete?: () => void;
 }
 
 export default function OwnerActions({ 
   onEdit, 
-  onContact, 
   onViewBallistics, 
   onDelete 
 }: OwnerActionsProps) {
@@ -24,12 +21,6 @@ export default function OwnerActions({
         onClick={onEdit}
       >
         <Edit className="h-4 w-4 mr-2" /> Edit
-      </Button>
-      <Button 
-        className="flex-1"
-        onClick={onContact}
-      >
-        <MessageSquare className="h-4 w-4 mr-2" /> Messages
       </Button>
       <Button 
         variant="outline"

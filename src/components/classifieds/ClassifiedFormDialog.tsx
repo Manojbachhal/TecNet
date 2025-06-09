@@ -20,7 +20,8 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState<number | undefined>(undefined);
-  const [contactInfo, setContactInfo] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -33,9 +34,10 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
       setTitle(editItem.title);
       setDescription(editItem.description || '');
       setPrice(editItem.price || undefined);
-      setContactInfo(editItem.contactInfo || '');
-      setExistingImageUrl(editItem.imageUrl);
-      setImagePreview(editItem.imageUrl || null);
+      setEmail(editItem.email || '');
+      setPhoneNumber(editItem.phone_number || '');
+      setExistingImageUrl(editItem.image_url);
+      setImagePreview(editItem.image_url || null);
     } else {
       resetForm();
     }
@@ -45,7 +47,8 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
     setTitle('');
     setDescription('');
     setPrice(undefined);
-    setContactInfo('');
+    setEmail('');
+    setPhoneNumber('');
     setImageFile(null);
     setImagePreview(null);
     setExistingImageUrl(null);
@@ -147,7 +150,8 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
         title,
         description,
         price: price || 0,
-        contactInfo,
+        email,
+        phoneNumber,
         imageUrl
       });
 
@@ -212,10 +216,19 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
           <div className="space-y-2">
             <Label htmlFor="contactInfo">Contact Information</Label>
             <Input
-              id="contactInfo"
-              value={contactInfo}
-              onChange={(e) => setContactInfo(e.target.value)}
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="How can interested parties reach you?"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactInfo">Contact Information</Label>
+            <Input
+              id="phone_number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Phone number"
             />
           </div>
           
