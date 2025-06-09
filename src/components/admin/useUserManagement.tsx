@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -15,6 +14,29 @@ export const useUserManagement = (currentUserId: string | undefined) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!currentUserId) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', currentUserId)
+          .single();
+
+        if (error) throw error;
+        setIsCurrentUserAdmin(data?.role === 'admin');
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsCurrentUserAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [currentUserId]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -69,6 +91,16 @@ export const useUserManagement = (currentUserId: string | undefined) => {
   
   const toggleAdminStatus = async (userId: string, makeAdmin: boolean) => {
     try {
+      // Check if current user is admin
+      if (!isCurrentUserAdmin) {
+        toast({
+          title: "Permission Denied",
+          description: "Only administrators can change user roles.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Don't allow changing your own admin status
       if (userId === currentUserId) {
         toast({

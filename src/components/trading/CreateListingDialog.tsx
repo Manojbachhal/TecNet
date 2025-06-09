@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 interface CreateListingDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (listing: ListingItem) => void;
+  onSave: (listing: ListingItem, editingId?: string) => Promise<boolean>;
   editItem?: ListingItem | null;
   userFirearms: any[];
   initialFirearm?: FirearmItem | null;
@@ -122,14 +122,16 @@ const CreateListingDialog = ({ isOpen, onClose, onSave, editItem, userFirearms, 
         firearmId: selectedFirearm || undefined
       };
       
-      await onSave(listing);
+      // Pass the editItem.id as editingId when editing
+      const success = await onSave(listing, editItem?.id);
       
-      onClose();
-      
-      toast({
-        title: editItem ? "Listing Updated" : "Listing Created",
-        description: editItem ? "Your listing has been updated successfully." : "Your item has been listed for trade."
-      });
+      if (success) {
+        onClose();
+        toast({
+          title: editItem ? "Listing Updated" : "Listing Created",
+          description: editItem ? "Your listing has been updated successfully." : "Your item has been listed for trade."
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
   const [uploading, setUploading] = useState(false);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (editItem) {
@@ -67,6 +67,45 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
     setImageFile(null);
     setImagePreview(null);
     setExistingImageUrl(null);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please drop an image file (PNG, JPG or GIF).",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,7 +167,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editItem ? "Edit Classified Ad" : "Post a Classified Ad"}</DialogTitle>
         </DialogHeader>
@@ -139,6 +178,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
             <Input
               id="title"
               value={title}
+              maxLength={100}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What are you selling or looking for?"
               required
@@ -201,9 +241,13 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
             ) : (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-center w-full">
-                  <label 
+                  <label
                     htmlFor="file-upload"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 transition-colors ${isDragging ? 'border-primary bg-primary/10' : ''}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Upload className="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" />

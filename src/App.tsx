@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AdminProtectedRoute from "@/components/auth/AdminProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Inventory from "./pages/Inventory";
@@ -58,17 +58,16 @@ const App = () => (
                     </ProtectedRoute>
                   } 
                 />
-                <Route path="/classifieds" element={<Classifieds />} />
                 <Route 
-                  path="/messages" 
+                  path="/classifieds" 
                   element={
                     <ProtectedRoute>
-                      <Messages />
+                      <Classifieds />
                     </ProtectedRoute>
                   } 
                 />
                 <Route 
-                  path="/range-finder" 
+                  path="/rangefinder" 
                   element={
                     <ProtectedRoute>
                       <RangeFinder />
@@ -80,6 +79,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Ballistics />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/messages" 
+                  element={
+                    <ProtectedRoute>
+                      <Messages />
                     </ProtectedRoute>
                   } 
                 />
@@ -102,9 +109,9 @@ const App = () => (
                 <Route 
                   path="/admin" 
                   element={
-                    <ProtectedRoute>
+                    <AdminProtectedRoute>
                       <Admin />
-                    </ProtectedRoute>
+                    </AdminProtectedRoute>
                   } 
                 />
                 <Route path="/news" element={<News />} />

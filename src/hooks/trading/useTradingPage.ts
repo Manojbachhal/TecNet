@@ -118,18 +118,22 @@ export const useTradingPage = () => {
         listing_type: 'sale' as const
       };
 
-      console.log('Saving listing with data:', formattedData);
+      console.log('Saving listing with data:', formattedData, 'editingId:', editingId);
       
+      let result;
       if (editingId) {
         // Update existing listing
-        const { error } = await supabase
+        result = await supabase
           .from('trading_listings')
           .update(formattedData)
-          .eq('id', editingId);
+          .eq('id', editingId)
+          .eq('owner_id', session.user.id)
+          .select()
+          .single();
           
-        if (error) {
-          console.error('Error updating listing:', error);
-          throw error;
+        if (result.error) {
+          console.error('Error updating listing:', result.error);
+          throw result.error;
         }
         
         toast({
@@ -138,13 +142,15 @@ export const useTradingPage = () => {
         });
       } else {
         // Create new listing
-        const { error } = await supabase
+        result = await supabase
           .from('trading_listings')
-          .insert(formattedData);
+          .insert(formattedData)
+          .select()
+          .single();
           
-        if (error) {
-          console.error('Error creating listing:', error);
-          throw error;
+        if (result.error) {
+          console.error('Error creating listing:', result.error);
+          throw result.error;
         }
         
         toast({
