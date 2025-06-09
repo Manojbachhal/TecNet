@@ -25,28 +25,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 }) => {
   const { signOut, session } = useAuth();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!session?.user?.id) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-
-        if (error) throw error;
-        setIsAdmin(data?.role === 'admin');
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-      }
-    };
-
-    checkAdminStatus();
-  }, [session?.user?.id]);
 
   return (
     <DropdownMenu>
@@ -72,12 +50,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {isAdmin && (
-            <DropdownMenuItem onClick={() => navigate("/admin")} className="text-primary">
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Admin Dashboard</span>
-            </DropdownMenuItem>
-          )}
           <DropdownMenuItem onClick={() => navigate("/profile")}>
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
