@@ -1,20 +1,19 @@
-
-import React, { useEffect } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import { motion } from 'framer-motion';
-import MessageDialog from '@/components/trading/MessageDialog';
-import CreateListingDialog from '@/components/trading/CreateListingDialog';
-import TradingFilters from '@/components/trading/TradingFilters';
-import TradingGuidelines from '@/components/trading/TradingGuidelines';
-import TradingHeader from '@/components/trading/TradingHeader';
-import TradingTabs from '@/components/trading/TradingTabs';
-import TradingContent from '@/components/trading/TradingContent';
-import { useTradingPage } from '@/hooks/trading/useTradingPage';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect } from "react";
+import Navbar from "@/components/layout/Navbar";
+import { motion } from "framer-motion";
+import MessageDialog from "@/components/trading/MessageDialog";
+import CreateListingDialog from "@/components/trading/CreateListingDialog";
+import TradingFilters from "@/components/trading/TradingFilters";
+import TradingGuidelines from "@/components/trading/TradingGuidelines";
+import TradingHeader from "@/components/trading/TradingHeader";
+import TradingTabs from "@/components/trading/TradingTabs";
+import TradingContent from "@/components/trading/TradingContent";
+import { useTradingPage } from "@/hooks/trading/useTradingPage";
+import { useLocation } from "react-router-dom";
 
 const Trading = () => {
   const location = useLocation();
-  
+
   const {
     listings,
     filteredListings,
@@ -44,10 +43,10 @@ const Trading = () => {
     handleDeleteListing,
     handleReportListing,
   } = useTradingPage();
-  
+
   // Effect to automatically open create dialog when coming from inventory with an item
   useEffect(() => {
-    if (location.state?.listItem && location.state?.action === 'createListing') {
+    if (location.state?.listItem && location.state?.action === "createListing") {
       // This will be handled by useInventoryIntegration hook
       setIsCreateDialogOpen(true);
     }
@@ -56,21 +55,19 @@ const Trading = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
-      <main className="flex-grow container mx-auto px-4 py-6 pt-24"> {/* Added pt-24 to ensure content is below navbar */}
+
+      <main className="flex-grow container mx-auto px-4 py-6 pt-24">
+        {" "}
+        {/* Added pt-24 to ensure content is below navbar */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <TradingHeader onCreateListing={handleCreateListing} />
-          
-          <TradingTabs 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-            listings={listings}
-          />
-          
+
+          <TradingTabs activeTab={activeTab} onTabChange={setActiveTab} listings={listings} />
+
           <TradingFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -79,8 +76,8 @@ const Trading = () => {
             priceRange={priceRange}
             setPriceRange={setPriceRange}
           />
-          
-          <TradingContent 
+
+          <TradingContent
             isLoading={isLoading}
             filteredListings={filteredListings}
             searchTerm={searchTerm}
@@ -93,21 +90,23 @@ const Trading = () => {
             onDelete={handleDeleteListing}
             onReport={handleReportListing}
             onClearFilters={() => {
-              setSearchTerm('');
-              setPriceRange('all');
+              setSearchTerm("");
+              setPriceRange("all");
             }}
           />
-          
+
           <TradingGuidelines />
         </motion.div>
       </main>
-      
-      <MessageDialog 
+
+      <MessageDialog
         isOpen={!!contactItem}
         onClose={() => setContactItem(null)}
-        item={contactItem}
+        recipientId={contactItem?.owner_id}
+        contextType="trading"
+        contextId={contactItem?.id}
       />
-      
+
       <CreateListingDialog
         isOpen={isCreateDialogOpen}
         onClose={() => {

@@ -1,4 +1,3 @@
-
 import { useConversations } from './messages/useConversations';
 import { useMessageExchange } from './messages/useMessageExchange';
 import { useRealtime } from './messages/useRealtime';
@@ -25,14 +24,22 @@ export const useMessages = () => {
   // Set up real-time subscription
   useRealtime(currentConversation, fetchConversations, fetchMessages);
   
+  // Add context-aware wrappers
+  const fetchMessagesWithContext = (otherUserId: string, contextType?: 'trading' | 'classified', contextId?: string) => {
+    return fetchMessages(otherUserId, contextType, contextId);
+  };
+  const sendMessageWithContext = (recipientId: string, message: string, contextType?: 'trading' | 'classified', contextId?: string) => {
+    return sendMessage(recipientId, message, contextType, contextId);
+  };
+  
   return {
     conversations,
     messages,
     currentConversation,
     isLoading: conversationsLoading || messagesLoading,
     fetchConversations,
-    fetchMessages,
-    sendMessage,
+    fetchMessages: fetchMessagesWithContext,
+    sendMessage: sendMessageWithContext,
     setCurrentConversation
   };
 };

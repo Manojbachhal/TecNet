@@ -1,4 +1,5 @@
 export interface Classified {
+  imageUrl: any;
   id: string;
   title: string;
   description: string | null;

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Conversation, Message } from '@/types/message.types';
 
@@ -48,30 +47,31 @@ export const processConversations = (
 ): Conversation[] => {
   // Process messages into conversations
   const conversationMap: Record<string, Conversation> = {};
-  
   messages.forEach(message => {
     const otherUserId = message.sender_id === userId ? message.recipient_id : message.sender_id;
-    
-    if (!conversationMap[otherUserId]) {
-      conversationMap[otherUserId] = {
+    const contextType = message.context_type || '';
+    const contextId = message.context_id || '';
+    const key = `${contextType}:${contextId}:${otherUserId}`;
+    if (!conversationMap[key]) {
+      conversationMap[key] = {
         user_id: otherUserId,
         user_name: userMap[otherUserId] || 'Unknown User',
         last_message: message.message,
         unread_count: message.is_read === false && message.recipient_id === userId ? 1 : 0,
-        last_message_time: message.created_at
+        last_message_time: message.created_at,
+        context_type: message.context_type,
+        context_id: message.context_id
       };
-    } else if (new Date(message.created_at) > new Date(conversationMap[otherUserId].last_message_time)) {
+    } else if (new Date(message.created_at) > new Date(conversationMap[key].last_message_time)) {
       // Update last message if this one is newer
-      conversationMap[otherUserId].last_message = message.message;
-      conversationMap[otherUserId].last_message_time = message.created_at;
-      
+      conversationMap[key].last_message = message.message;
+      conversationMap[key].last_message_time = message.created_at;
       // Count unread messages
       if (message.is_read === false && message.recipient_id === userId) {
-        conversationMap[otherUserId].unread_count += 1;
+        conversationMap[key].unread_count += 1;
       }
     }
   });
-  
   // Convert map to array and sort by last message time
   return Object.values(conversationMap).sort((a, b) => 
     new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
