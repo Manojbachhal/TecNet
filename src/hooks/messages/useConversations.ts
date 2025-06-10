@@ -57,6 +57,7 @@ export const useConversations = () => {
             last_message_time: latest.created_at,
             context_type: latest.context_type,
             context_id: latest.context_id,
+            chatName: undefined,
           });
         }
         handleConversation(conversationArray);
