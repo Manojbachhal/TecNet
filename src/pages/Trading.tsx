@@ -38,6 +38,7 @@ const Trading = () => {
     handleContactSeller,
     handleToggleFavorite,
     handleEditListing,
+    handleSold,
     handleCreateListing,
     handleSaveListing,
     handleDeleteListing,
@@ -87,6 +88,7 @@ const Trading = () => {
             onContact={handleContactSeller}
             onToggleFavorite={handleToggleFavorite}
             onEdit={handleEditListing}
+            onSold={handleSold}
             onDelete={handleDeleteListing}
             onReport={handleReportListing}
             onClearFilters={() => {
