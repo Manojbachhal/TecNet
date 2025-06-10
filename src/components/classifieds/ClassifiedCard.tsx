@@ -1,12 +1,11 @@
-
-import React, { useState } from 'react';
-import { Classified } from './types';
+import React, { useState } from "react";
+import { Classified } from "./types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Pencil, Trash2, DollarSign, User, MessageCircle } from "lucide-react";
-import { formatDistanceToNow } from 'date-fns';
-import MessageDialog from '@/components/messaging/MessageDialog';
-import { useAuth } from '@/contexts/AuthContext';
+import { formatDistanceToNow } from "date-fns";
+import MessageDialog from "@/components/messaging/MessageDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ClassifiedCardProps {
   classified: Classified;
@@ -18,16 +17,16 @@ interface ClassifiedCardProps {
 const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCardProps) => {
   const { user } = useAuth();
   const [isMessageOpen, setIsMessageOpen] = useState(false);
-  
+
   const handleContactClick = () => {
-    if (classified.contactInfo) {
+    if (classified.email) {
       // If it looks like an email, open mail app
-      if (classified.contactInfo.includes('@')) {
-        window.location.href = `mailto:${classified.contactInfo}`;
+      if (classified.email.includes("@")) {
+        window.location.href = `mailto:${classified.email}`;
       }
       // If it looks like a phone number, open phone app
-      else if (classified.contactInfo.replace(/\D/g, '').length >= 7) {
-        window.location.href = `tel:${classified.contactInfo.replace(/\D/g, '')}`;
+      else if (classified.phone_number.replace(/\D/g, "").length >= 7) {
+        window.location.href = `tel:${classified.phone_number.replace(/\D/g, "")}`;
       }
     }
   };
@@ -42,7 +41,7 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
     try {
       return formatDistanceToNow(new Date(dateString), { addSuffix: true });
     } catch (e) {
-      return 'Recently';
+      return "Recently";
     }
   };
 
@@ -55,40 +54,41 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
             alt={classified.title}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/placeholder.svg';
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
             }}
           />
           {classified.price !== null && classified.price > 0 && (
             <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-sm font-medium flex items-center">
               <DollarSign className="h-3 w-3 mr-1" />
-              {classified.price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+              {classified.price.toLocaleString("en-US", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}
             </div>
           )}
         </div>
       )}
-      
+
       <CardHeader className="pb-2">
         <CardTitle className="text-lg line-clamp-2">{classified.title}</CardTitle>
       </CardHeader>
-      
+
       <CardContent className="pb-4 flex-grow">
         <p className="text-sm text-muted-foreground line-clamp-3">
-          {classified.description || 'No description provided.'}
+          {classified.description || "No description provided."}
         </p>
       </CardContent>
-      
+
       <CardFooter className="flex flex-col border-t pt-4 gap-2">
         <div className="flex justify-between items-center w-full">
-          <div className="text-xs text-muted-foreground">
-            {getTimeAgo(classified.createdAt)}
-          </div>
-          
+          <div className="text-xs text-muted-foreground">{getTimeAgo(classified.createdAt)}</div>
+
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <User className="h-3 w-3" />
-            <span>{classified.postedBy || 'Anonymous'}</span>
+            <span>{classified.postedBy || "Anonymous"}</span>
           </div>
         </div>
-        
+
         <div className="flex justify-end w-full gap-2">
           {isOwner ? (
             <>
@@ -104,21 +104,16 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
           ) : (
             <>
               {user && classified.userId && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleMessageClick}
-                  className="h-8"
-                >
+                <Button variant="outline" size="sm" onClick={handleMessageClick} className="h-8">
                   <MessageCircle className="h-3.5 w-3.5 mr-1" />
                   Message
                 </Button>
               )}
-              <Button 
-                variant="default" 
-                size="sm" 
+              <Button
+                variant="default"
+                size="sm"
                 onClick={handleContactClick}
-                disabled={!classified.contactInfo}
+                disabled={!classified.phone_number}
                 className="h-8"
               >
                 <Mail className="h-3.5 w-3.5 mr-1" />
@@ -130,10 +125,12 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
       </CardFooter>
 
       {/* Message Dialog */}
-      <MessageDialog 
-        isOpen={isMessageOpen} 
+      <MessageDialog
+        isOpen={isMessageOpen}
         onClose={() => setIsMessageOpen(false)}
         recipientId={classified.userId || undefined}
+        contextType={"classified"}
+        contextId={classified.id}
       />
     </Card>
   );
