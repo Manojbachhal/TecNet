@@ -1,4 +1,4 @@
-import { ReportData } from '../ReportListingDialog';
+import { ReportData } from "../ReportListingDialog";
 
 export interface ListingItem {
   id: string;
@@ -26,9 +26,11 @@ export interface TradingItemProps {
   onContact: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onEdit?: (id: string) => void;
+  onSold?: (id: string) => void;
   onDelete?: (id: string) => Promise<boolean>;
   onReport?: (reportData: ReportData) => void;
   isOwner?: boolean;
+  activeTab?: string;
 }
 
 export interface TradingListingRow {

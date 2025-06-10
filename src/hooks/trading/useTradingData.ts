@@ -24,7 +24,7 @@ export const useTradingData = () => {
           throw error;
         }
 
-        const transformedListings : ListingItem[] = data.map((item) => ({
+        const transformedListings: ListingItem[] = data.map((item) => ({
           id: item.id,
           title: item.title,
           price: Number(item.price),
