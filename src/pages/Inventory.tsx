@@ -22,6 +22,7 @@ import { FirearmItem } from "@/components/inventory/InventoryItem";
 import { useInventory } from "@/hooks/useInventory";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExistingTrade } from "@/hooks/trading/useExistingTrade";
+import { Item } from "@radix-ui/react-dropdown-menu";
 
 export default function Inventory() {
   const { toast } = useToast();
@@ -102,10 +103,12 @@ export default function Inventory() {
   };
 
   const handleListForTrading = async (item: FirearmItem) => {
+    console.log(item);
     const { data, error } = await supabase
       .from("trading_listings")
       .select("*")
-      .eq("title", `${item.make} ${item.model} - ${item.caliber}`);
+      .eq("title", `${item.make} ${item.model} - ${item.caliber}`)
+      .eq("firearm_id", item.id);
 
     if (data && data.length > 0) {
       toast({

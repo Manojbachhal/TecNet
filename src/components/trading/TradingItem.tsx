@@ -62,7 +62,8 @@ export default function TradingItem({
           />
 
           <CardFooter className="pt-2">
-            {(isOwner && onEdit) || activeTab == "sold" ? (
+            {/* || activeTab == "sold" */}
+            {isOwner && onEdit ? (
               <OwnerActions
                 onEdit={() => onEdit(item.id)}
                 onSold={() => onSold(item.id)}

@@ -38,19 +38,20 @@ const TradingContent = ({
 }: TradingContentProps) => {
   const [soldData, setSoldData] = useState([]);
 
-  useEffect(() => {
-    console.log();
-    const getSoldListing = async () => {
-      if (activeTab == "sold") {
-        console.log("first");
-        const { data } = await supabase.from("trading_listings").select("*").eq("status", "sold");
-        const filteredData = data.filter((ele) => ele.seller_name == sessionUsername);
-        setSoldData(filteredData);
-      }
-    };
-    getSoldListing();
-    console.log(activeTab);
-  }, [activeTab]);
+  // useEffect(() => {
+  //   console.log();
+  //   const getSoldListing = async () => {
+  //     if (activeTab == "sold") {
+  //       console.log("first");
+  //       const { data } = await supabase.from("trading_listings").select("*").eq("status", "sold");
+  //       const filteredData = data.filter((ele) => ele.seller_name == sessionUsername);
+  //       setSoldData(filteredData);
+  //     }
+  //   };
+  //   getSoldListing();
+  //   console.log(activeTab);
+  // }, [activeTab]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -72,7 +73,8 @@ const TradingContent = ({
 
   return (
     <TradingListingsGrid
-      listings={activeTab == "sold" ? soldData : filteredListings}
+      // listings={activeTab == "sold" ? soldData : filteredListings}
+      listings={filteredListings}
       onContact={onContact}
       activeTab={activeTab}
       onToggleFavorite={onToggleFavorite}
