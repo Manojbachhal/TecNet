@@ -63,7 +63,7 @@ export default function InventoryHeader({
               <input
                 type="file"
                 id="import-file"
-                accept=".json"
+                accept=".xlsx,.xls"
                 className="hidden"
                 onChange={onImportInventory}
               />
