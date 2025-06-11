@@ -20,7 +20,7 @@ const TradingTabs = ({ activeTab, onTabChange, listings }: TradingTabsProps) => 
         <TabsTrigger value="favorites">
           Favorites ({listings.filter((item) => item.favorite).length})
         </TabsTrigger>
-        <TabsTrigger value="sold">Sold Items</TabsTrigger>
+        {/* <TabsTrigger value="sold">Sold Items</TabsTrigger> */}
       </TabsList>
     </Tabs>
   );
