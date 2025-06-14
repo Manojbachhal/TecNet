@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MapPin, Flag, AlertTriangle, User, Phone, Shield, Copy, Camera } from "lucide-react";
+import { MapPin, Flag, AlertTriangle, User, Phone, Shield, Copy, Camera, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
   setProfileData
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [removeLoading, setRemoveLoading] = useState(false);
   
   const copyUserID = () => {
     if (user?.id) {
@@ -114,6 +115,39 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
     }
   };
 
+  const removeAvatar = async () => {
+    try {
+      setRemoveLoading(true);
+      
+      // Update profile to remove avatar URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", user?.id);
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      // Update local state
+      setProfileData({ ...profileData, avatar_url: "" });
+      
+      toast({
+        title: "Avatar removed",
+        description: "Your profile picture has been removed successfully.",
+      });
+    } catch (error) {
+      console.error("Error removing avatar:", error);
+      toast({
+        title: "Error removing avatar",
+        description: "There was an error removing your profile picture.",
+        variant: "destructive",
+      });
+    } finally {
+      setRemoveLoading(false);
+    }
+  };
+
   return (
     <Card className="w-full md:w-1/3">
       <CardHeader className="relative">
@@ -129,12 +163,25 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
               <User className="w-12 h-12 text-muted-foreground" />
             )}
             
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity">
+              <div className="flex gap-2">
             <label 
               htmlFor="profile-avatar-upload"
-              className="absolute inset-0 flex items-center justify-center bg-primary/50 hover:bg-primary/70 text-white cursor-pointer"
+                  className="p-2 rounded-full bg-primary hover:bg-primary/90 text-white cursor-pointer"
             >
-              <Camera className="w-8 h-8" />
+                  <Camera className="w-5 h-5" />
             </label>
+                {profileData.avatar_url && (
+                  <button
+                    onClick={removeAvatar}
+                    disabled={removeLoading}
+                    className="p-2 rounded-full bg-destructive hover:bg-destructive/90 text-white cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
             <input
               id="profile-avatar-upload"
               type="file"

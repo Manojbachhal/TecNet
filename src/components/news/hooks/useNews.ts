@@ -45,8 +45,9 @@ export function useNews(initialQuery: string = "firearms") {
       
       // Extract news items from the response
       if (data.news_results && Array.isArray(data.news_results)) {
-        setNewsItems(data.news_results);
-        console.log(`Successfully fetched ${data.news_results.length} news items`);
+        const requiredNews = data.news_results.filter((item: NewsItem) => item.title && item.link && item.source);
+        setNewsItems(requiredNews);
+        console.log(`Successfully fetched ${requiredNews.length} news items`);
       } else {
         setNewsItems([]);
         console.log('No news items found in response');
