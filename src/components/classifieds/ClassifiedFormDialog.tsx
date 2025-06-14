@@ -214,7 +214,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="contactInfo">Contact Information</Label>
+            <Label htmlFor="contactInfo">Email</Label>
             <Input
               id="email"
               value={email}

@@ -32,15 +32,15 @@ import Navbar from "@/components/layout/Navbar";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <RoleProvider>
-          {/* <StorageSetup /> */}
-          <Toaster />
-          <Sonner />
-          <div className="content-container min-h-screen flex flex-col">
-            <BrowserRouter>
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <RoleProvider>
+            {/* <StorageSetup /> */}
+            <Toaster />
+            <Sonner />
+            <div className="content-container min-h-screen flex flex-col">
               <Navbar />
               <div className="flex-grow">
                 <Routes>
@@ -129,12 +129,12 @@ const App = () => (
                 </Routes>
               </div>
               <Footer />
-            </BrowserRouter>
-          </div>
-        </RoleProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+            </div>
+          </RoleProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </BrowserRouter>
 );
 
 export default App;
