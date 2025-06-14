@@ -12,15 +12,21 @@ const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ allowedRoles, c
   const { session, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useRole();
 
-  if (authLoading || roleLoading) return null; // or a spinner
+  // While loading, show a loader or null
+  if (authLoading || roleLoading) return null;
 
+  // Not logged in
   if (!session || !user) {
-    // Not logged in
     return <Navigate to="/auth" replace />;
   }
 
-  if (!role || !allowedRoles.includes(role)) {
-    // Not authorized
+  // Role is still not resolved (e.g., null or undefined)
+  if (!role) {
+    return null; // still waiting
+  }
+
+  // Role exists but not authorized
+  if (!allowedRoles.includes(role)) {
     return <Navigate to="/not-authorized" replace />;
   }
 

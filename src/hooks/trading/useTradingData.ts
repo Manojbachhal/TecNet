@@ -3,28 +3,46 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ListingItem } from "@/components/trading/types/tradingTypes";
 import { formatDateDifference } from "@/components/trading/utils/dateUtils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useTradingData = () => {
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { session } = useAuth();
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
 
-        const { data, error } = await supabase
+        // Fetch active listings
+        const { data: listingsData, error: listingsError } = await supabase
           .from("trading_listings")
           .select("*")
           .eq("status", "active")
           .order("created_at", { ascending: false });
 
-        if (error) {
-          throw error;
+        if (listingsError) {
+          throw listingsError;
         }
 
-        const transformedListings: ListingItem[] = data.map((item) => ({
+        // Fetch user's favorites if logged in
+        let userFavorites: string[] = [];
+        if (session?.user?.id) {
+          const { data: favoritesData, error: favoritesError } = await supabase
+            .from("favourites")
+            .select("tradeId")
+            .eq("userId", session.user.id);
+
+          if (favoritesError) {
+            console.error("Error fetching favorites:", favoritesError);
+          } else {
+            userFavorites = favoritesData.map(fav => fav.tradeId);
+          }
+        }
+
+        const transformedListings: ListingItem[] = listingsData.map((item) => ({
           id: item.id,
           title: item.title,
           price: Number(item.price),
@@ -36,7 +54,7 @@ export const useTradingData = () => {
           postedDate: formatDateDifference(new Date(item.created_at)),
           images: item.image_url ? [item.image_url] : [],
           description: item.description || "",
-          favorite: false,
+          favorite: userFavorites.includes(item.id),
           firearmId: item.firearm_id,
           reported: item.reported || false,
         }));
@@ -56,7 +74,7 @@ export const useTradingData = () => {
     };
 
     fetchListings();
-  }, [toast]);
+  }, [toast, session?.user?.id]); // Add session.user.id as dependency
 
   return { listings, setListings, isLoading };
 };

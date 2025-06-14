@@ -14,20 +14,30 @@ export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const fetchRole = async () => {
       setLoading(true);
-      if (user?.id) {
+      try {
+        if (!user?.id) {
+          setRole(null);
+          return;
+        }
+
         const { data, error } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
           .single();
+
+        if (error) throw error;
         setRole(data?.role || "user");
-      } else {
-        setRole(null);
+      } catch (error) {
+        console.error("Error fetching role:", error);
+        setRole("user");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
+
     fetchRole();
-  }, [user]);
+  }, [user?.id]);
 
   return (
     <RoleContext.Provider value={{ role, loading }}>

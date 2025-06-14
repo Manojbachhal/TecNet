@@ -1,25 +1,72 @@
-
 import { ListingItem } from '@/components/trading/types/tradingTypes';
 import { ReportData } from '@/components/trading/ReportListingDialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useListingActions = (listings: ListingItem[], setListings: React.Dispatch<React.SetStateAction<ListingItem[]>>) => {
   const { toast } = useToast();
+  const { session } = useAuth();
 
-  const toggleFavorite = (id: string) => {
-    const newListings = listings.map(item => 
-      item.id === id ? { ...item, favorite: !item.favorite } : item
-    );
-    setListings(newListings);
-    
-    const item = listings.find(item => item.id === id);
-    if (item) {
+  const toggleFavorite = async (id: string) => {
+    if (!session?.user?.id) {
       toast({
-        title: item.favorite ? "Removed from Favorites" : "Added to Favorites",
-        description: item.favorite 
-          ? `${item.title} has been removed from your favorites.`
-          : `${item.title} has been added to your favorites.`,
+        title: "Authentication Required",
+        description: "Please sign in to add favorites.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const item = listings.find(item => item.id === id);
+      if (!item) return;
+
+      if (item.favorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('favourites')
+          .delete()
+          .match({ 
+            userId: session.user.id,
+            tradeId: id
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Removed from Favorites",
+          description: `${item.title} has been removed from your favorites.`,
+        });
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('favourites')
+          .insert({
+            userId: session.user.id,
+            tradeId: id
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Added to Favorites",
+          description: `${item.title} has been added to your favorites.`,
+        });
+      }
+
+      // Update local state
+      const newListings = listings.map(item => 
+        item.id === id ? { ...item, favorite: !item.favorite } : item
+      );
+      setListings(newListings);
+
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorites. Please try again later.",
+        variant: "destructive"
       });
     }
   };
