@@ -109,7 +109,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 auth-background">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 auth-background mt-16">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted opacity-90"></div>
