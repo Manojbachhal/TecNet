@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from '@/hooks/use-toast';
-import { Classified } from './types';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Upload, X } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { Classified } from "./types";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Upload, X } from "lucide-react";
 
 interface ClassifiedFormDialogProps {
   isOpen: boolean;
@@ -17,11 +23,11 @@ interface ClassifiedFormDialogProps {
 }
 
 const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedFormDialogProps) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number | undefined>(undefined);
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -32,10 +38,10 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
   useEffect(() => {
     if (editItem) {
       setTitle(editItem.title);
-      setDescription(editItem.description || '');
+      setDescription(editItem.description || "");
       setPrice(editItem.price || undefined);
-      setEmail(editItem.email || '');
-      setPhoneNumber(editItem.phone_number || '');
+      setEmail(editItem.email || "");
+      setPhoneNumber(editItem.phone_number || "");
       setExistingImageUrl(editItem.image_url);
       setImagePreview(editItem.image_url || null);
     } else {
@@ -44,11 +50,11 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
   }, [editItem, isOpen]);
 
   const resetForm = () => {
-    setTitle('');
-    setDescription('');
+    setTitle("");
+    setDescription("");
     setPrice(undefined);
-    setEmail('');
-    setPhoneNumber('');
+    setEmail("");
+    setPhoneNumber("");
     setImageFile(null);
     setImagePreview(null);
     setExistingImageUrl(null);
@@ -88,9 +94,9 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -101,7 +107,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
       toast({
         title: "Invalid File",
         description: "Please drop an image file (PNG, JPG or GIF).",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -113,12 +119,12 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title) {
       toast({
         title: "Missing Information",
         description: "Please provide a title for your classified ad.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -131,7 +137,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
       if (imageFile) {
         const fileName = `${Date.now()}-${imageFile.name}`;
         const { data, error } = await supabase.storage
-          .from('classifieds-images')
+          .from("classifieds-images")
           .upload(fileName, imageFile);
 
         if (error) {
@@ -140,7 +146,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
 
         // Get public URL
         const { data: publicUrlData } = supabase.storage
-          .from('classifieds-images')
+          .from("classifieds-images")
           .getPublicUrl(fileName);
 
         imageUrl = publicUrlData.publicUrl;
@@ -152,17 +158,17 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
         price: price || 0,
         email,
         phoneNumber,
-        imageUrl
+        imageUrl,
       });
 
       resetForm();
       onClose();
     } catch (error) {
-      console.error('Error saving classified:', error);
+      console.error("Error saving classified:", error);
       toast({
         title: "Error",
         description: "There was a problem uploading your image or saving your classified ad.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setUploading(false);
@@ -175,7 +181,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
         <DialogHeader>
           <DialogTitle>{editItem ? "Edit Classified Ad" : "Post a Classified Ad"}</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
@@ -188,7 +194,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -199,7 +205,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
               rows={3}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="price">Price</Label>
             <Input
@@ -207,12 +213,13 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
               type="number"
               min="0"
               step="0.01"
-              value={price || ''}
+              value={price || ""}
               onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
               placeholder="Enter price (optional)"
+              required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="contactInfo">Email</Label>
             <Input
@@ -220,6 +227,7 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="How can interested parties reach you?"
+              required
             />
           </div>
           <div className="space-y-2">
@@ -231,16 +239,12 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
               placeholder="Phone number"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label>Image</Label>
             {imagePreview ? (
               <div className="relative rounded-md overflow-hidden h-48 bg-muted">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                 <Button
                   type="button"
                   variant="destructive"
@@ -256,7 +260,9 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
                 <div className="flex items-center justify-center w-full">
                   <label
                     htmlFor="file-upload"
-                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 transition-colors ${isDragging ? 'border-primary bg-primary/10' : ''}`}
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 transition-colors ${
+                      isDragging ? "border-primary bg-primary/10" : ""
+                    }`}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragEnter={handleDragEnter}
@@ -269,28 +275,28 @@ const ClassifiedFormDialog = ({ isOpen, onClose, onSave, editItem }: ClassifiedF
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF</p>
                     </div>
-                    <input 
+                    <input
                       id="file-upload"
-                      type="file" 
-                      accept="image/*" 
+                      type="file"
+                      accept="image/*"
                       className="hidden"
                       onChange={handleFileChange}
-                      onClick={(e) => e.currentTarget.value = ''} // Reset input on click
+                      onClick={(e) => (e.currentTarget.value = "")} // Reset input on click
                     />
                   </label>
                 </div>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   className="w-full"
-                  onClick={() => document.getElementById('file-upload')?.click()}
+                  onClick={() => document.getElementById("file-upload")?.click()}
                 >
                   Select Image
                 </Button>
               </div>
             )}
           </div>
-          
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={uploading}>
               Cancel
