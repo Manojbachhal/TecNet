@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Classified } from "./types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Pencil, Trash2, DollarSign, User, MessageCircle } from "lucide-react";
+import { Mail, Pencil, Trash2, DollarSign, User, MessageCircle, Phone } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import MessageDialog from "@/components/messaging/MessageDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { TooltipContent } from "@radix-ui/react-tooltip";
+import { Tooltip, TooltipTrigger } from "../ui/tooltip";
 
 interface ClassifiedCardProps {
   classified: Classified;
@@ -19,15 +21,15 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
   const [isMessageOpen, setIsMessageOpen] = useState(false);
 
   const handleContactClick = () => {
-    if (classified.email) {
+    if (classified.contactInfo) {
       // If it looks like an email, open mail app
-      if (classified.email.includes("@")) {
-        window.location.href = `mailto:${classified.email}`;
+      if (classified.contactInfo.includes("@")) {
+        window.location.href = `mailto:${classified.contactInfo}`;
       }
-      // If it looks like a phone number, open phone app
-      else if (classified.phone_number.replace(/\D/g, "").length >= 7) {
-        window.location.href = `tel:${classified.phone_number.replace(/\D/g, "")}`;
-      }
+      // // If it looks like a phone number, open phone app
+      // else if (classified.phone_number.replace(/\D/g, "").length >= 7) {
+      //   window.location.href = `tel:${classified.phone_number.replace(/\D/g, "")}`;
+      // }
     }
   };
 
@@ -44,7 +46,7 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
       return "Recently";
     }
   };
-
+  console.log(classified, "classified");
   return (
     <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-all group">
       {classified.imageUrl && (
@@ -109,16 +111,44 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
                   Message
                 </Button>
               )}
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleContactClick}
-                disabled={!classified.phone_number}
-                className="h-8"
-              >
-                <Mail className="h-3.5 w-3.5 mr-1" />
-                Contact
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleContactClick}
+                    disabled={!classified.contactInfo}
+                    className="h-8"
+                  >
+                    <Phone className="h-3.5 w-3.5 mr-1" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="bg-slate-700 text-sm px-[10px] py-[3px] mb-1 rounded">
+                    {classified.phoneNumber || "No Phone number available"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleContactClick}
+                    disabled={!classified.contactInfo}
+                    className="h-8"
+                  >
+                    <Mail className="h-3.5 w-3.5 mr-1" />
+                    Contact
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="bg-slate-700 text-sm px-[10px] py-[3px] mb-1 rounded">
+                    {classified.contactInfo || "No email available"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </>
           )}
         </div>

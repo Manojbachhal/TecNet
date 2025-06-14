@@ -1,4 +1,6 @@
 export interface Classified {
+  contactInfo: any;
+  phoneNumber: any;
   imageUrl: any;
   id: string;
   title: string;
