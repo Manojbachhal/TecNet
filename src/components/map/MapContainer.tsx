@@ -21,7 +21,7 @@ import {
   MapContainerProps 
 } from './types';
 
-export default function MapContainer({ apiKey, onOpenPantoneView }: MapContainerProps) {
+export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter }: MapContainerProps) {
   const [selectedLocation, setSelectedLocation] = useState<GunLocation | null>(null);
   const [searchRadius, setSearchRadius] = useState<number>(10000); // 10km default for better coverage
   const [showLegend, setShowLegend] = useState<boolean>(false);
@@ -88,6 +88,21 @@ export default function MapContainer({ apiKey, onOpenPantoneView }: MapContainer
     });
   }, [getUserLocation, searchNearbyGunPlaces]);
 
+  const handleUseProfileLocation = useCallback(() => {
+    if (initialCenter) {
+      if (mapRef.current) {
+        mapRef.current.panTo(initialCenter);
+        mapRef.current.setZoom(11);
+      }
+      searchNearbyGunPlaces(initialCenter);
+      
+      toast({
+        title: "Using profile location",
+        description: "Searching for firearms-related businesses near your profile location."
+      });
+    }
+  }, [initialCenter, searchNearbyGunPlaces, toast]);
+
   const handleMarkerClick = useCallback((location: GunLocation) => {
     setSelectedLocation(location);
     checkStreetViewAvailability(location.position, streetViewServiceRef.current);
@@ -145,13 +160,14 @@ export default function MapContainer({ apiKey, onOpenPantoneView }: MapContainer
   useEffect(() => {
     if (mapLoaded && !userPosition && !initialSearchDone) {
       const timer = setTimeout(() => {
-        searchNearbyGunPlaces(defaultCenter);
+        const center = initialCenter || defaultCenter;
+        searchNearbyGunPlaces(center);
         setInitialSearchDone(true);
       }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [mapLoaded, searchNearbyGunPlaces, userPosition, initialSearchDone]);
+  }, [mapLoaded, searchNearbyGunPlaces, userPosition, initialSearchDone, initialCenter]);
 
   if (loadError) {
     return (
@@ -183,7 +199,7 @@ export default function MapContainer({ apiKey, onOpenPantoneView }: MapContainer
 
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
-        center={userPosition || defaultCenter}
+        center={userPosition || initialCenter || defaultCenter}
         zoom={7}
         onLoad={onLoad}
         onUnmount={onUnmount}
@@ -218,9 +234,10 @@ export default function MapContainer({ apiKey, onOpenPantoneView }: MapContainer
         )}
       </GoogleMap>
 
-      <MapControls 
+      <MapControls
         onMapTypeChange={handleMapTypeChange}
         onGetUserLocation={handleGetUserLocation}
+        onUseProfileLocation={handleUseProfileLocation}
         onToggleRadiusControl={() => setShowRadiusControl(!showRadiusControl)}
         onToggleLegend={() => setShowLegend(!showLegend)}
         showRadiusControl={showRadiusControl}
@@ -230,6 +247,7 @@ export default function MapContainer({ apiKey, onOpenPantoneView }: MapContainer
         mapType={mapType}
         searchRadius={searchRadius}
         onSearchRadiusChange={setSearchRadius}
+        hasProfileLocation={!!initialCenter}
       />
 
       {isSearching && (

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from '@/components/layout/Navbar';
 import { Search, Book, FileText, MessageSquare, HeadphonesIcon, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Help() {
   return (
@@ -100,9 +101,11 @@ export default function Help() {
             </CardHeader>
             <CardContent>
               <p className="mb-4">Our support team is available Monday through Friday, 9am-5pm PST.</p>
-              <Button variant="outline" className="w-full" onClick={() => window.location.href = '/contact'}>
-                Contact Support
-              </Button>
+              <Link to="/contact">
+                <Button variant="outline" className="w-full">
+                  Contact Support
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -116,9 +119,11 @@ export default function Help() {
             </CardHeader>
             <CardContent>
               <p className="mb-4">Find answers to common questions about our services, account management, and more.</p>
-              <Button variant="outline" className="w-full" onClick={() => window.location.href = '/faq'}>
-                View FAQs
-              </Button>
+              <Link to="/faq">
+                <Button variant="outline" className="w-full">
+                  View FAQs
+                </Button>
+              </Link> 
             </CardContent>
           </Card>
         </div>

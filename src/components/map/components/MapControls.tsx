@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
-import { Layers, Target, Sliders, Info, X } from 'lucide-react';
+import { Layers, Target, Sliders, Info, X, MapPin } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface MapControlsProps {
   onMapTypeChange: (type: string) => void;
   onGetUserLocation: () => void;
+  onUseProfileLocation: () => void;
   onToggleRadiusControl: () => void;
   onToggleLegend: () => void;
   showRadiusControl: boolean;
@@ -15,11 +15,13 @@ interface MapControlsProps {
   mapType: string;
   searchRadius: number;
   onSearchRadiusChange: (radius: number) => void;
+  hasProfileLocation: boolean;
 }
 
 const MapControls: React.FC<MapControlsProps> = ({
   onMapTypeChange,
   onGetUserLocation,
+  onUseProfileLocation,
   onToggleRadiusControl,
   onToggleLegend,
   showRadiusControl,
@@ -28,7 +30,8 @@ const MapControls: React.FC<MapControlsProps> = ({
   onToggleMapTypeControl,
   mapType,
   searchRadius,
-  onSearchRadiusChange
+  onSearchRadiusChange,
+  hasProfileLocation
 }) => {
   return (
     <>
@@ -45,41 +48,34 @@ const MapControls: React.FC<MapControlsProps> = ({
         
         {showMapTypeControl && (
           <div className="absolute top-full right-0 mt-2 bg-background/95 backdrop-blur-sm p-2 rounded-lg shadow-lg border border-primary/30 cyberpunk-border w-36">
-            <div className="flex flex-col gap-1">
-              <button
-                className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${mapType === 'roadmap' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10'}`}
-                onClick={() => onMapTypeChange('roadmap')}
-              >
-                <span className="w-3 h-3 rounded-full bg-[#4d94ff]"></span>
-                Road Map
-              </button>
-              <button
-                className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${mapType === 'satellite' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10'}`}
-                onClick={() => onMapTypeChange('satellite')}
-              >
-                <span className="w-3 h-3 rounded-full bg-[#ffa64d]"></span>
-                Satellite
-              </button>
-              <button
-                className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${mapType === 'hybrid' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10'}`}
-                onClick={() => onMapTypeChange('hybrid')}
-              >
-                <span className="w-3 h-3 rounded-full bg-[#4dff88]"></span>
-                Hybrid
-              </button>
-              <button
-                className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${mapType === 'terrain' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10'}`}
-                onClick={() => onMapTypeChange('terrain')}
-              >
-                <span className="w-3 h-3 rounded-full bg-[#cb4dff]"></span>
-                Terrain
-              </button>
-            </div>
+            <button
+              className={`w-full text-left px-3 py-2 rounded-md text-sm ${mapType === 'roadmap' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-primary/10'}`}
+              onClick={() => onMapTypeChange('roadmap')}
+            >
+              Standard
+            </button>
+            <button
+              className={`w-full text-left px-3 py-2 rounded-md text-sm ${mapType === 'satellite' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-primary/10'}`}
+              onClick={() => onMapTypeChange('satellite')}
+            >
+              Satellite
+            </button>
+            <button
+              className={`w-full text-left px-3 py-2 rounded-md text-sm ${mapType === 'hybrid' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-primary/10'}`}
+              onClick={() => onMapTypeChange('hybrid')}
+            >
+              Hybrid
+            </button>
+            <button
+              className={`w-full text-left px-3 py-2 rounded-md text-sm ${mapType === 'terrain' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-primary/10'}`}
+              onClick={() => onMapTypeChange('terrain')}
+            >
+              Terrain
+            </button>
           </div>
         )}
       </div>
 
-      {/* Bottom Controls */}
       <div className="absolute bottom-4 left-4 z-10 flex flex-col items-start space-y-3">
         <button
           className="p-3 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background neon-glow"
@@ -89,6 +85,17 @@ const MapControls: React.FC<MapControlsProps> = ({
         >
           <Target className="h-5 w-5" />
         </button>
+
+        {hasProfileLocation && (
+          <button
+            className="p-3 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background neon-glow"
+            onClick={onUseProfileLocation}
+            aria-label="Use profile location"
+            title="Use profile location"
+          >
+            <MapPin className="h-5 w-5" />
+          </button>
+        )}
 
         {/* Radius Control - Now using Popover */}
         <Popover open={showRadiusControl} onOpenChange={onToggleRadiusControl}>
@@ -101,7 +108,7 @@ const MapControls: React.FC<MapControlsProps> = ({
               <Sliders className="h-5 w-5" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-60 p-0 bg-background/95 backdrop-blur-sm border border-primary/30 cyberpunk-border" sideOffset={5} align="start">
+          <PopoverContent className="w-80">
             <div className="p-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-semibold">Search Radius</h3>
@@ -133,14 +140,14 @@ const MapControls: React.FC<MapControlsProps> = ({
           <PopoverTrigger asChild>
             <button
               className="p-3 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background neon-glow"
-              aria-label="Show location types legend"
-              title="Show location types legend"
+              aria-label="Show legend"
+              title="Show legend"
             >
               <Info className="h-5 w-5" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-[280px] p-0 bg-background/95 backdrop-blur-sm border border-primary/30 cyberpunk-border" sideOffset={5} align="start">
-            <div className="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <PopoverContent className="w-80">
+            <div className="p-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-semibold">Location Types</h3>
                 <button 

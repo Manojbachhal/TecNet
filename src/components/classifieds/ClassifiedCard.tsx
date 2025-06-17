@@ -111,7 +111,7 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
                   Message
                 </Button>
               )}
-              <Tooltip>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="default"
@@ -128,7 +128,7 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
                     {classified.phoneNumber || "No Phone number available"}
                   </p>
                 </TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
 
               <Tooltip>
                 <TooltipTrigger asChild>
