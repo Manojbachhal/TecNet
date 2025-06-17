@@ -12,6 +12,7 @@ export interface ListingItem {
   description: string;
   postedDate: string;
   favorite?: boolean;
+  isSold: boolean;
   firearmId?: string;
   // Ballistic properties
   bulletWeight?: number;
@@ -19,6 +20,7 @@ export interface ListingItem {
   ballisticCoefficient?: number;
   reported?: boolean;
   owner_id: string;
+  listing_type?: string;
 }
 
 export interface TradingItemProps {

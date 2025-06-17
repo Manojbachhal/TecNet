@@ -1,9 +1,13 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 interface AdditionalDetailsProps {
   condition: string;
@@ -47,13 +51,36 @@ export default function AdditionalDetails({
         </div>
         <div className="space-y-2">
           <Label htmlFor="purchaseDate">Purchase Date</Label>
-          <Input 
-            id="purchaseDate" 
-            name="purchaseDate" 
-            type="date" 
-            value={purchaseDate} 
-            onChange={onChange} 
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {purchaseDate ? format(new Date(purchaseDate), "PPP") : "Pick a date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={purchaseDate ? new Date(purchaseDate) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    const event = {
+                      target: {
+                        name: 'purchaseDate',
+                        value: date.toISOString().split('T')[0]
+                      }
+                    } as React.ChangeEvent<HTMLInputElement>;
+                    onChange(event);
+                  }
+                }}
+                disabled={(date) => date > new Date()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       
@@ -65,7 +92,7 @@ export default function AdditionalDetails({
           type="number" 
           min="0" 
           step="0.01" 
-          value={value} 
+          value={value === 0 ? '' : value} 
           onChange={onValueChange} 
         />
       </div>

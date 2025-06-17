@@ -104,8 +104,30 @@ const CreateListingDialog = ({ isOpen, onClose, onSave, editItem, userFirearms, 
     }
     
     try {
+      // Ensure we have a firearm_id if we're creating from inventory
+      const firearmId = initialFirearm?.id || selectedFirearm;
+      
+      // Only require firearm selection if we don't have an initialFirearm
+      if (!firearmId && !initialFirearm) {
+        toast({
+          title: "Missing Firearm ID",
+          description: "Please select a firearm from your inventory.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Validate image URL
-      const imagesList = images.length > 0 && images[0] ? images : [];
+      const imagesList = images.length > 0 && images[0] ? images : [initialFirearm?.image_url];
+      
+      // Create a more detailed description if we have firearm details
+      let finalDescription = description;
+      if (initialFirearm) {
+        finalDescription = `${initialFirearm.make} ${initialFirearm.model} in ${initialFirearm.caliber} caliber.\n` +
+          `Condition: ${initialFirearm.condition}\n` +
+          (initialFirearm.notes ? `${initialFirearm.notes}\n\n` : '') +
+          (description ? `Additional Details:\n${description}` : '');
+      }
       
       const listing: ListingItem = {
         id: editItem?.id || '',
@@ -117,10 +139,14 @@ const CreateListingDialog = ({ isOpen, onClose, onSave, editItem, userFirearms, 
         sellerRating: editItem?.sellerRating || 5,
         postedDate: editItem?.postedDate || 'Just now',
         images: imagesList,
-        description,
+        description: finalDescription,
         favorite: editItem?.favorite || false,
-        firearmId: selectedFirearm || undefined
+        firearmId: firearmId,
+        isSold: false,
+        owner_id: session.user.id
       };
+      
+      console.log('Creating listing with data:', listing);
       
       // Pass the editItem.id as editingId when editing
       const success = await onSave(listing, editItem?.id);
@@ -133,6 +159,7 @@ const CreateListingDialog = ({ isOpen, onClose, onSave, editItem, userFirearms, 
         });
       }
     } catch (error: any) {
+      console.error('Error saving listing:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save listing. Please try again.",

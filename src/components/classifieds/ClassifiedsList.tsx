@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Classified } from './types';
 import ClassifiedCard from './ClassifiedCard';
@@ -11,6 +10,7 @@ interface ClassifiedsListProps {
   isOwner: (classified: Classified) => boolean;
   onEditClassified: (classified: Classified) => void;
   onDeleteClassified: (id: string) => void;
+  onSold: (classified: Classified) => void;
 }
 
 const ClassifiedsList = ({ 
@@ -19,7 +19,8 @@ const ClassifiedsList = ({
   searchTerm,
   isOwner,
   onEditClassified, 
-  onDeleteClassified
+  onDeleteClassified,
+  onSold
 }: ClassifiedsListProps) => {
   if (isLoading) {
     return (
@@ -49,6 +50,7 @@ const ClassifiedsList = ({
           isOwner={isOwner(classified)}
           onEdit={() => onEditClassified(classified)}
           onDelete={() => onDeleteClassified(classified.id)}
+          onSold={() => onSold(classified)}
         />
       ))}
     </div>

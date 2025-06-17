@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { FirearmItem } from '../InventoryItem';
 import { useImageUploadService } from './ImageUploadService';
@@ -30,7 +29,15 @@ export const useInventoryForm = (isOpen: boolean, editItem: FirearmItem | null, 
     if (isOpen) {
       if (editItem) {
         console.log('Editing item:', editItem);
-        setFormData(editItem);
+        // Ensure purchaseDate is not in the future
+        const purchaseDate = editItem.purchaseDate || new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
+        const validPurchaseDate = purchaseDate > today ? today : purchaseDate;
+        
+        setFormData({
+          ...editItem,
+          purchaseDate: validPurchaseDate
+        });
         setImageFile(null);
       } else {
         // For new items, generate a UUID immediately
@@ -54,8 +61,14 @@ export const useInventoryForm = (isOpen: boolean, editItem: FirearmItem | null, 
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setFormData(prev => ({ ...prev, value }));
+    const inputValue = e.target.value;
+    // Handle empty input or valid number (including decimals)
+    if (inputValue === '' || !isNaN(parseFloat(inputValue))) {
+      setFormData(prev => ({ 
+        ...prev, 
+        value: inputValue === '' ? 0 : parseFloat(inputValue)
+      }));
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

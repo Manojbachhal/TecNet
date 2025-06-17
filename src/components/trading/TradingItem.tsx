@@ -12,6 +12,7 @@ import DeleteConfirmDialogWrapper from "./dialogs/DeleteConfirmDialogWrapper";
 import ReportListingDialogWrapper from "./dialogs/ReportListingDialogWrapper";
 import { useItemBallistics } from "./hooks/useItemBallistics";
 import { normalizeImages } from "./utils/imageUtils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function TradingItem({
   item,
@@ -20,93 +21,95 @@ export default function TradingItem({
   onEdit,
   onSold,
   onDelete,
-  activeTab,
   onReport,
-  isOwner = false,
+  activeTab,
 }: TradingItemProps) {
-  const [showAnalysisDialog, setShowAnalysisDialog] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const { session } = useAuth();
   const { handleViewBallistics } = useItemBallistics(item);
+  const isOwner = session?.user?.id === item.owner_id;
 
-  // Ensure we always have a normalized array for images
-  const sanitizedImages = normalizeImages(item.images);
+  // Don't render if item is sold and not in "my-listings" tab
+  if (item.isSold && activeTab !== "my-listings") {
+    return null;
+  }
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="hover-scale"
-      >
-        <Card className="overflow-hidden h-full flex flex-col shadow-lg border-2 hover:border-primary/30 transition-all">
-          <ItemImage
-            title={item.title}
-            price={item.price}
-            images={sanitizedImages}
-            favorite={item.favorite}
-            isOwner={isOwner}
-            onToggleFavorite={() => onToggleFavorite(item.id)}
-            onReport={() => setIsReportDialogOpen(true)}
-          />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card className="overflow-hidden h-full flex flex-col">
+        <ItemImage
+          images={normalizeImages(item.images)}
+          title={item.title}
+          price={item.price}
+          isOwner={isOwner}
+          onToggleFavorite={() => onToggleFavorite(item.id)}
+          onReport={() => setIsReportDialogOpen(true)}
+          isSold={item.isSold}
+        />
 
-          <ItemHeader title={item.title} location={item.location} />
+        <ItemHeader
+          title={item.title}
+          location={item.location}
+        />
 
-          <ItemContent
-            condition={item.condition}
-            postedDate={item.postedDate}
-            description={item.description}
-            sellerName={item.sellerName}
-            sellerRating={item.sellerRating}
-          />
+        <ItemContent
+          description={item.description}
+          condition={item.condition}
+          postedDate={item.postedDate}
+          sellerName={item.sellerName}
+          sellerRating={item.sellerRating}
+        />
 
-          <CardFooter className="pt-2">
-            {/* || activeTab == "sold" */}
-            {isOwner && onEdit ? (
-              <OwnerActions
-                onEdit={() => onEdit(item.id)}
-                onSold={() => onSold(item.id)}
-                onContact={() => onContact(item.id)}
-                onViewBallistics={handleViewBallistics}
-                onDelete={onDelete ? () => setIsDeleteDialogOpen(true) : undefined}
-              />
-            ) : (
-              <BuyerActions
-                onContact={() => onContact(item.id)}
-                onViewBallistics={handleViewBallistics}
-                onAnalyze={() => setShowAnalysisDialog(true)}
-              />
-            )}
-          </CardFooter>
-        </Card>
-      </motion.div>
+        <CardFooter className="flex flex-col gap-4 pt-4 mt-auto">
+          {isOwner ? (
+            <OwnerActions
+              onEdit={() => onEdit?.(item.id)}
+              onSold={() => onSold?.(item.id)}
+              onContact={() => onContact(item.id)}
+              onViewBallistics={handleViewBallistics}
+              onDelete={onDelete ? () => setIsDeleteConfirmOpen(true) : undefined}
+            />
+          ) : (
+            <BuyerActions
+              onContact={() => onContact(item.id)}
+              onViewBallistics={handleViewBallistics}
+              onAnalyze={() => setIsAnalysisOpen(true)}
+            />
+          )}
+        </CardFooter>
+      </Card>
 
       <AnalysisDialogWrapper
-        isOpen={showAnalysisDialog}
-        onOpenChange={setShowAnalysisDialog}
+        isOpen={isAnalysisOpen}
+        onOpenChange={setIsAnalysisOpen}
         item={item}
       />
 
       <DeleteConfirmDialogWrapper
-        isOpen={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={() => {
-          if (onDelete) {
-            return onDelete(item.id);
+        isOpen={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        onConfirm={async () => {
+          const success = await onDelete?.(item.id);
+          if (success) {
+            setIsDeleteConfirmOpen(false);
           }
-          return Promise.resolve(false);
+          return success;
         }}
       />
 
-      {onReport && (
-        <ReportListingDialogWrapper
-          isOpen={isReportDialogOpen}
-          onOpenChange={setIsReportDialogOpen}
-          onSubmit={onReport}
-          item={item}
-        />
-      )}
-    </>
+      <ReportListingDialogWrapper
+        isOpen={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
+        onSubmit={onReport}
+        item={item}
+      />
+    </motion.div>
   );
 }
