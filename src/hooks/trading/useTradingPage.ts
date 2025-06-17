@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTradingListings } from "@/hooks/useTradingListings";
 import { useTradeFilters } from "@/hooks/trading/useTradeFilters";
@@ -8,196 +8,161 @@ import { ReportData } from "@/components/trading/ReportListingDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export const useTradingPage = () => {
-  // State from the useTradingListings hook
-  const { listings, isLoading, toggleFavorite, reportListing, setListings } = useTradingListings();
-
-  // Local state for UI management
+const useTradingPage = () => {
+  const { session } = useAuth();
+  const { toast } = useToast();
+  const [listings, setListings] = useState<ListingItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [priceRange, setPriceRange] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
   const [contactItem, setContactItem] = useState<ListingItem | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<ListingItem | null>(null);
 
-  // Auth context for user information
-  const { session } = useAuth();
-  const sessionUsername = session ? session.user.email?.split("@")[0] : null;
-  const { toast } = useToast();
+  const sessionUsername = session?.user?.user_metadata?.username;
 
-  // Filters and sorting
-  const {
-    searchTerm,
-    setSearchTerm,
-    sortBy,
-    setSortBy,
-    priceRange,
-    setPriceRange,
-    getFilteredListings,
-  } = useTradeFilters(listings, activeTab, session);
+  const fetchListings = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("trading_listings")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  // Inventory integration (for creating listings from inventory items)
-  const { userFirearms, initialFirearm, setInitialFirearm } = useInventoryIntegration(session);
+      if (error) {
+        throw error;
+      }
 
-  // Define handler functions that use the core actions
+      if (data) {
+        const formattedListings = data.map((item) => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+          location: item.location,
+          condition: item.condition,
+          sellerName: item.seller_name,
+          sellerRating: item.seller_rating,
+          postedDate: item.created_at,
+          images: item.image_url ? [item.image_url] : [],
+          description: item.description,
+          favorite: false,
+          isSold: item.is_sold || false,
+          owner_id: item.owner_id,
+          listing_type: item.listing_type,
+          reported: item.reported,
+        }));
+
+        setListings(formattedListings);
+      }
+    } catch (error) {
+      console.error("Error fetching listings:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load listings. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial fetch in useEffect
+  useEffect(() => {
+    fetchListings();
+  }, []); // Empty dependency array means this runs once on mount
+
+  const handleCreateListing = () => {
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be signed in to create a listing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleSaveListing = async (listing: ListingItem, editingId?: string) => {
+    try {
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "You must be signed in to create or edit listings.",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      const listingData = {
+        title: listing.title,
+        price: listing.price,
+        location: listing.location,
+        condition: listing.condition,
+        description: listing.description,
+        image_url: listing.images[0] || null,
+        owner_id: session.user.id,
+        firearm_id: listing.firearmId,
+        listing_type: "sale" as const,
+        status: "active" as const,
+        is_sold: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      if (editingId) {
+        const { error } = await supabase
+          .from("trading_listings")
+          .update(listingData)
+          .eq("id", editingId);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("trading_listings")
+          .insert([listingData]);
+
+        if (error) throw error;
+      }
+
+      await fetchListings();
+      return true;
+    } catch (error) {
+      console.error("Error saving listing:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save listing. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   const handleContactSeller = (id: string) => {
     const item = listings.find((item) => item.id === id);
     if (item) {
       setContactItem(item);
     }
-    return item;
   };
 
-  const handleToggleFavorite = (id: string) => {
-    toggleFavorite(id);
-  };
-
-  const handleReportListing = (reportData: ReportData) => {
-    reportListing(reportData);
-  };
-
-  const handleSold = async (id: string): Promise<any> => {
-    const { error } = await supabase
-      .from("trading_listings")
-      .update({ status: "sold" })
-      .eq("id", id);
-    setListings((prevListings) => prevListings.filter((item) => item.id !== id));
-  };
-
-  const handleDeleteListing = async (id: string): Promise<boolean> => {
-    try {
-      const { error } = await supabase.from("trading_listings").delete().eq("id", id);
-
-      const { error: messageError } = await supabase
-        .from("direct_messages")
-        .delete()
-        .eq("context_id", id);
-
-      if (error || messageError) throw error;
-
-      setListings((prevListings) => prevListings.filter((item) => item.id !== id));
-
+  const handleToggleFavorite = async (id: string) => {
+    if (!session) {
       toast({
-        title: "Listing Deleted",
-        description: "Your listing has been removed successfully.",
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Error deleting listing:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete listing. Please try again later.",
+        title: "Authentication Required",
+        description: "You must be signed in to favorite listings.",
         variant: "destructive",
       });
-      return false;
+      return;
     }
+
+    const updatedListings = listings.map((item) =>
+      item.id === id ? { ...item, favorite: !item.favorite } : item
+    );
+    setListings(updatedListings);
   };
 
-  const handleSaveListing = async (data: any, editingId?: string) => {
-    try {
-      if (!session?.user?.id) {
-        throw new Error("You must be logged in to create a listing");
-      }
-
-      // Ensure we have a valid image URL or null
-      let imageUrl = null;
-      if (data.imageUrl && typeof data.imageUrl === "string" && data.imageUrl.trim() !== "") {
-        imageUrl = data.imageUrl;
-      } else if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-        imageUrl = data.images[0];
-      }
-
-      // Format the data for the database
-      const formattedData = {
-        title: data.title,
-        price: parseFloat(data.price),
-        description: data.description || null,
-        condition: data.condition || "Good",
-        location: data.location || null,
-        image_url: imageUrl,
-        firearm_id: data.firearmId || null,
-        seller_name: sessionUsername,
-        seller_rating: 5,
-        owner_id: session.user.id,
-        status: "active" as const,
-        listing_type: "sale" as const,
-      };
-
-      console.log("Saving listing with data:", formattedData, "editingId:", editingId);
-
-      let result;
-      if (editingId) {
-        // Update existing listing
-        result = await supabase
-          .from("trading_listings")
-          .update(formattedData)
-          .eq("id", editingId)
-          .eq("owner_id", session.user.id)
-          .select()
-          .single();
-
-        if (result.error) {
-          console.error("Error updating listing:", result.error);
-          throw result.error;
-        }
-
-        toast({
-          title: "Listing Updated",
-          description: "Your listing has been updated successfully.",
-        });
-      } else {
-        // Create new listing
-        result = await supabase.from("trading_listings").insert(formattedData).select().single();
-
-        if (result.error) {
-          console.error("Error creating listing:", result.error);
-          throw result.error;
-        }
-
-        toast({
-          title: "Listing Created",
-          description: "Your listing has been created successfully.",
-        });
-      }
-
-      // Fetch fresh listings after successful save
-      const { data: freshListings, error: fetchError } = await supabase
-        .from("trading_listings")
-        .select("*")
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (!fetchError && freshListings) {
-        const transformedListings = freshListings.map((item) => ({
-          id: item.id,
-          title: item.title,
-          price: Number(item.price),
-          location: item.location || "",
-          condition: item.condition || "Good",
-          sellerName: item.seller_name || "Anonymous",
-          sellerRating: item.seller_rating || 5,
-          postedDate: "Just now",
-          images: item.image_url ? [item.image_url] : [],
-          description: item.description || "",
-          favorite: false,
-          firearmId: item.firearm_id,
-          reported: item.reported || false,
-        }));
-        setListings(transformedListings as ListingItem[]);
-      }
-
-      return true;
-    } catch (error: any) {
-      console.error("Error saving listing:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save listing. Please try again later.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  // Custom UI handlers that combine other handlers
   const handleEditListing = (id: string) => {
     const item = listings.find((item) => item.id === id);
     if (item) {
@@ -206,17 +171,140 @@ export const useTradingPage = () => {
     }
   };
 
-  const handleCreateListing = () => {
-    if (!session) {
-      return;
+  const handleDeleteListing = async (id: string) => {
+    try {
+      await supabase.from("trading_listings").delete().eq("id", id);
+      toast({
+        title: "Listing Deleted",
+        description: "Your listing has been removed.",
+      });
+      fetchListings();
+      return true;
+    } catch (error) {
+      console.error("Error deleting listing:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete your listing. Please try again.",
+        variant: "destructive",
+      });
+      return false;
     }
-
-    setEditItem(null);
-    setInitialFirearm(null);
-    setIsCreateDialogOpen(true);
   };
 
-  // Get filtered listings
+  const handleReportListing = async (reportData: any) => {
+    try {
+      await supabase.from("trading_listings").update({ reported: true }).eq("id", reportData.id);
+      toast({
+        title: "Listing Reported",
+        description: "Thank you for your report. We will review it shortly.",
+      });
+      fetchListings();
+    } catch (error) {
+      console.error("Error reporting listing:", error);
+      toast({
+        title: "Error",
+        description: "Failed to report the listing. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSold = async (id: string) => {
+    try {
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "You must be signed in to mark items as sold.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Update the listing as sold
+      const { error: updateError } = await supabase
+        .from("trading_listings")
+        .update({ 
+          is_sold: true,
+          status: "sold" as const,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", id);
+
+      if (updateError) {
+        console.error("Error updating listing:", updateError);
+        throw updateError;
+      }
+
+      // Remove from favourites table if present
+      const { error: favouritesError } = await supabase
+        .from("favourites")
+        .delete()
+        .eq("tradeId", id);
+
+      if (favouritesError) {
+        console.error("Error removing from favourites:", favouritesError);
+        // Don't throw here, as this is not critical
+      }
+
+      await fetchListings();
+      toast({
+        title: "Success",
+        description: "Item marked as sold successfully."
+      });
+    } catch (error) {
+      console.error("Error marking item as sold:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark item as sold. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getFilteredListings = () => {
+    let filtered = [...listings];
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by price range
+    if (priceRange !== "all") {
+      const [min, max] = priceRange.split("-").map(Number);
+      filtered = filtered.filter((item) => item.price >= min && item.price <= max);
+    }
+
+    // Filter by active tab
+    if (activeTab === "my-listings") {
+      filtered = filtered.filter((item) => item.owner_id === session?.user.id);
+    } else if (activeTab === "favorites") {
+      filtered = filtered.filter((item) => item.favorite);
+    }
+
+    // Sort listings
+    switch (sortBy) {
+      case "price-low":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        filtered.sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+        break;
+      case "oldest":
+        filtered.sort((a, b) => new Date(a.postedDate).getTime() - new Date(b.postedDate).getTime());
+        break;
+    }
+
+    return filtered;
+  };
+
   const filteredListings = getFilteredListings();
 
   return {
@@ -231,22 +319,22 @@ export const useTradingPage = () => {
     setPriceRange,
     activeTab,
     setActiveTab,
+    sessionUsername,
     contactItem,
     setContactItem,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
     editItem,
-    userFirearms,
-    initialFirearm,
-    setInitialFirearm,
-    sessionUsername,
+    handleCreateListing,
+    handleSaveListing,
     handleContactSeller,
     handleToggleFavorite,
     handleEditListing,
-    handleCreateListing,
-    handleSaveListing,
     handleDeleteListing,
     handleReportListing,
     handleSold,
+    refetchListings: fetchListings,
   };
 };
+
+export { useTradingPage };

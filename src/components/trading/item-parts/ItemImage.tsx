@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Shield } from "lucide-react";
+import { Heart, Shield, Flag, CheckCircle } from "lucide-react";
 import { getReliableFallbackImage, getFirstValidImage, normalizeImages } from '../utils/imageUtils';
 
 interface ItemImageProps {
@@ -13,6 +12,7 @@ interface ItemImageProps {
   isOwner: boolean;
   onToggleFavorite: () => void;
   onReport: () => void;
+  isSold?: boolean;
 }
 
 export default function ItemImage({ 
@@ -22,7 +22,8 @@ export default function ItemImage({
   favorite, 
   isOwner, 
   onToggleFavorite, 
-  onReport 
+  onReport, 
+  isSold = false,
 }: ItemImageProps) {
   const [imageError, setImageError] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -54,18 +55,20 @@ export default function ItemImage({
         className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         onError={handleImageError}
       />
-      <div className="absolute top-2 right-2 flex gap-1">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className={`backdrop-blur-sm bg-background/40 border border-background/10 ${
-            favorite ? 'text-destructive' : 'text-muted-foreground'
-          }`}
-          onClick={onToggleFavorite}
-          title="Add to favorites"
-        >
-          <Heart className={`h-5 w-5 ${favorite ? 'fill-destructive' : ''}`} />
-        </Button>
+      <div className="absolute top-2 right-2 flex gap-2">
+        {!isOwner && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`backdrop-blur-sm bg-background/40 border border-background/10 ${
+              favorite ? 'text-destructive' : 'text-muted-foreground'
+            }`}
+            onClick={onToggleFavorite}
+            title="Add to favorites"
+          >
+            <Heart className={`h-5 w-5 ${favorite ? 'fill-destructive' : ''}`} />
+          </Button>
+        )}
         
         {!isOwner && (
           <Button 
@@ -75,12 +78,18 @@ export default function ItemImage({
             onClick={onReport}
             title="Report listing"
           >
-            <Shield className="h-5 w-5" />
+            <Flag className="h-5 w-5" />
           </Button>
         )}
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
         <Badge className="text-lg font-bold bg-primary">${price.toLocaleString()}</Badge>
+        {isSold && (
+          <Badge variant="secondary" className="bg-green-600 text-white">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Sold
+          </Badge>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Classified } from "./types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Pencil, Trash2, DollarSign, User, MessageCircle, Phone } from "lucide-react";
+import { Mail, Pencil, Trash2, DollarSign, User, MessageCircle, Phone, CheckCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import MessageDialog from "@/components/messaging/MessageDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,9 +14,10 @@ interface ClassifiedCardProps {
   isOwner: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onSold: () => void;
 }
 
-const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCardProps) => {
+const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete, onSold }: ClassifiedCardProps) => {
   const { user } = useAuth();
   const [isMessageOpen, setIsMessageOpen] = useState(false);
 
@@ -68,6 +69,12 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
               })}
             </div>
           )}
+          {classified.isSold && (
+            <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-1 rounded-full text-sm font-medium flex items-center">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Sold
+            </div>
+          )}
         </div>
       )}
 
@@ -94,6 +101,12 @@ const ClassifiedCard = ({ classified, isOwner, onEdit, onDelete }: ClassifiedCar
         <div className="flex justify-end w-full gap-2">
           {isOwner ? (
             <>
+              {!classified.isSold && (
+                <Button variant="outline" size="sm" onClick={onSold} className="h-8">
+                  <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                  Mark as Sold
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={onEdit} className="h-8">
                 <Pencil className="h-3.5 w-3.5 mr-1" />
                 Edit

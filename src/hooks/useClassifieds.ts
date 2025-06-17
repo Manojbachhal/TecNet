@@ -81,9 +81,13 @@ export const useClassifieds = () => {
             phoneNumber: item.phone_number || "",
             imageUrl: item.image_url,
             userId: item.user_id,
-            createdAt: item.created_at ? new Date(item.created_at) : "",
-            updatedAt: item.updated_at ? new Date(item.updated_at) : null,
+            createdAt: item.created_at || "",
+            updatedAt: item.updated_at || "",
             postedBy: postedBy,
+            isSold: item.is_sold || false,
+            email: item.email || "",
+            phone_number: item.phone_number || "",
+            image_url: item.image_url || "",
           };
         });
 

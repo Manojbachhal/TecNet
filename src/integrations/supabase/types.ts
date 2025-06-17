@@ -687,6 +687,7 @@ export type Database = {
           firearm_id: string | null
           id: string
           image_url: string | null
+          is_sold: boolean | null
           listing_type: Database["public"]["Enums"]["listing_type"]
           location: string | null
           owner_id: string
@@ -705,6 +706,7 @@ export type Database = {
           firearm_id?: string | null
           id?: string
           image_url?: string | null
+          is_sold?: boolean | null
           listing_type: Database["public"]["Enums"]["listing_type"]
           location?: string | null
           owner_id: string
@@ -723,6 +725,7 @@ export type Database = {
           firearm_id?: string | null
           id?: string
           image_url?: string | null
+          is_sold?: boolean | null
           listing_type?: Database["public"]["Enums"]["listing_type"]
           location?: string | null
           owner_id?: string

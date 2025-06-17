@@ -103,7 +103,7 @@ export default function Inventory() {
   };
 
   const handleListForTrading = async (item: FirearmItem) => {
-    console.log(item);
+    console.log('Listing item for trading:', item);
     const { data, error } = await supabase
       .from("trading_listings")
       .select("*")
@@ -112,14 +112,31 @@ export default function Inventory() {
 
     if (data && data.length > 0) {
       toast({
-        title: "Listing already exist",
+        title: "Listing already exists",
         variant: "destructive",
-        description: `${item.make} ${item.model} listing already exit in trading.`,
+        description: `${item.make} ${item.model} listing already exists in trading.`,
       });
     } else {
+      // Ensure all necessary fields are included
+      const itemForTrading = {
+        ...item,
+        id: item.id,
+        make: item.make,
+        model: item.model,
+        caliber: item.caliber,
+        serialNumber: item.serialNumber,
+        condition: item.condition,
+        purchaseDate: item.purchaseDate,
+        value: item.value,
+        notes: item.notes,
+        image: item.image,
+        image_url: item.image_url,
+        user_id: user?.id
+      };
+
       navigate("/trading", {
         state: {
-          listItem: item,
+          listItem: itemForTrading,
           action: "createListing",
         },
       });
