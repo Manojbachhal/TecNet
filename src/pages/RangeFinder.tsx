@@ -1,32 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MapContainer from '@/components/map/MapContainer';
-import Navbar from '@/components/layout/Navbar';
-import PageHeader from '@/components/map/components/PageHeader';
-import InfoPanel from '@/components/map/components/InfoPanel';
-import MapMessage from '@/components/map/components/MapMessage';
 import Footer from '@/components/map/components/Footer';
+import PageHeader from '@/components/map/components/PageHeader';
 import PantoneView from '@/components/map/PantoneView';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, MapPin } from "lucide-react";
 
-const RangeFinder = () => {
-  const [showInfo, setShowInfo] = useState(false);
+export default function RangeFinder() {
+  const { user } = useAuth();
   const [showPantoneView, setShowPantoneView] = useState(false);
-  const [selectedLocationName, setSelectedLocationName] = useState<string>("");
+  const [selectedLocationName, setSelectedLocationName] = useState('');
   const [profileLocation, setProfileLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const { user } = useAuth();
-  
-  useEffect(() => {
-    if (user) {
-      fetchProfileLocation();
-    }
-  }, [user]);
+  const [hasProfileLocation, setHasProfileLocation] = useState(false);
 
+  // Fetch profile location
   const fetchProfileLocation = async () => {
     try {
       const { data, error } = await supabase
@@ -51,6 +43,7 @@ const RangeFinder = () => {
               lat: location.lat(),
               lng: location.lng()
             });
+            setHasProfileLocation(true);
             setLocationError(null);
           } else {
             console.error('Geocoding failed:', status);
@@ -66,6 +59,7 @@ const RangeFinder = () => {
     }
   };
 
+  // Request current location
   const requestCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -103,23 +97,26 @@ const RangeFinder = () => {
       });
     }
   };
-  
+
+  // Initial location setup
+  useEffect(() => {
+    fetchProfileLocation();
+  }, [user]);
+
   const handleOpenPantoneView = (locationName: string) => {
     setSelectedLocationName(locationName);
     setShowPantoneView(true);
   };
-  
-  const toggleInfo = () => setShowInfo(!showInfo);
-  const closeInfo = () => setShowInfo(false);
-  
+
   return (
-    <div className="h-full flex flex-col bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-background">
+      <PageHeader 
+        showInfo={false}
+        toggleInfo={() => {}}
+      />
       
-      <div className="container mx-auto px-4 py-4 relative z-10 h-full flex flex-col pt-24">
-        <PageHeader showInfo={showInfo} toggleInfo={toggleInfo} />
-        
-        {locationError ? (
+      <div className="container mx-auto px-4 py-8">
+        {locationError && (
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Location Required</AlertTitle>
@@ -127,20 +124,16 @@ const RangeFinder = () => {
               {locationError}
             </AlertDescription>
           </Alert>
-        ) : (
-          <MapMessage message="Click anywhere on the map to search that location" />
         )}
-        
-        <InfoPanel isVisible={showInfo} onClose={closeInfo} />
-        
-        <div className="flex-grow rounded-xl overflow-hidden shadow-xl relative border border-primary/30 cyberpunk-border" style={{ height: "calc(100vh - 250px)" }}>
+
+        <div className="relative h-[calc(100vh-12rem)] rounded-lg overflow-hidden border border-border">
           <MapContainer 
             initialCenter={profileLocation || currentLocation}
             onOpenPantoneView={handleOpenPantoneView}
           />
         </div>
       </div>
-      
+
       <Footer />
       
       <PantoneView 
@@ -150,6 +143,4 @@ const RangeFinder = () => {
       />
     </div>
   );
-};
-
-export default RangeFinder;
+}
