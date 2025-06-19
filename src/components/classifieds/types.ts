@@ -13,4 +13,5 @@ export interface Classified {
   createdAt: string;
   updatedAt: string | null;
   postedBy?: string; // Added field to store the username or email of who posted
+  isSold: boolean;
 }

@@ -1,7 +1,6 @@
-
 import React, { useRef, useEffect } from 'react';
 import { InfoWindow } from '@react-google-maps/api';
-import { MapPin, Maximize } from 'lucide-react';
+import { MapPin, Maximize, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { GunLocation } from '../types';
@@ -32,6 +31,12 @@ const LocationInfoWindow: React.FC<LocationInfoWindowProps> = ({
     
     console.log("LocationInfoWindow - Selected location:", selectedLocation.name, "Type:", selectedLocation.type);
   }, [selectedLocation, streetViewAvailable, initializeStreetView]);
+
+  const handleGetDirections = () => {
+    const { lat, lng } = selectedLocation.position;
+    const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    window.open(url, '_blank');
+  };
 
   return (
     <InfoWindow
@@ -67,19 +72,31 @@ const LocationInfoWindow: React.FC<LocationInfoWindowProps> = ({
             </span>
           </div>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-[10px] text-white/80 hover:text-white hover:bg-white/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              onShowFullscreenMap();
-            }}
-            title={streetViewAvailable ? "Open in Street View" : "Open in Fullscreen Map"}
-          >
-            <Maximize className="h-3 w-3 mr-1" />
-            {streetViewAvailable ? "Street View" : "Full Map"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[10px] text-white/80 hover:text-white hover:bg-white/10"
+              onClick={handleGetDirections}
+              title="Get Directions"
+            >
+              <Navigation className="h-3 w-3 mr-1" />
+              Directions
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[10px] text-white/80 hover:text-white hover:bg-white/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowFullscreenMap();
+              }}
+              title={streetViewAvailable ? "Open in Street View" : "Open in Fullscreen Map"}
+            >
+              <Maximize className="h-3 w-3 mr-1" />
+              {streetViewAvailable ? "Street View" : "Full Map"}
+            </Button>
+          </div>
         </div>
         
         {streetViewAvailable ? (

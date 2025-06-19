@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Edit, Crosshair, Trash2, BaggageClaim } from "lucide-react";
+import { Edit, Crosshair, Trash2, CheckCircle } from "lucide-react";
 
 interface OwnerActionsProps {
   onEdit: () => void;
@@ -21,9 +21,9 @@ export default function OwnerActions({
       <Button variant="outline" className="flex-1" onClick={onEdit}>
         <Edit className="h-4 w-4 mr-2" /> Edit
       </Button>
-      {/* <Button variant="outline" className="flex-1" onClick={onSold}>
-        <BaggageClaim className="h-4 w-4 mr-2" /> Sold
-      </Button> */}
+      <Button variant="outline" className="flex-1" onClick={onSold}>
+        <CheckCircle className="h-4 w-4 mr-2" /> Mark as Sold
+      </Button>
       <Button variant="outline" onClick={onViewBallistics} title="View Ballistics" size="icon">
         <Crosshair className="h-4 w-4" />
       </Button>

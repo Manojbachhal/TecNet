@@ -1,4 +1,3 @@
-
 import { Libraries } from "@react-google-maps/api";
 
 export interface GunLocation {
@@ -21,6 +20,7 @@ export interface PlaceResult {
 export interface MapContainerProps {
   apiKey?: string;
   onOpenPantoneView?: (locationName: string) => void;
+  initialCenter?: google.maps.LatLngLiteral | null;
 }
 
 export const mapContainerStyle = {
