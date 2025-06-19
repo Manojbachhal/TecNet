@@ -32,7 +32,7 @@ import Navbar from "@/components/layout/Navbar";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <BrowserRouter>
+  <BrowserRouter basename="/tacnet">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
@@ -114,7 +114,7 @@ const App = () => (
                   <Route
                     path="/admin"
                     element={
-                      <RoleProtectedRoute allowedRoles={['admin']}>
+                      <RoleProtectedRoute allowedRoles={["admin"]}>
                         <Admin />
                       </RoleProtectedRoute>
                     }
