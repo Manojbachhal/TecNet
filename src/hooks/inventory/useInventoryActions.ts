@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { FirearmItem } from '@/components/inventory/InventoryItem';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { generateUUID } from '@/lib/utils';
 
 export const useInventoryActions = (session: any, items: FirearmItem[], setItems: React.Dispatch<React.SetStateAction<FirearmItem[]>>) => {
   const { toast } = useToast();
@@ -61,7 +61,7 @@ export const useInventoryActions = (session: any, items: FirearmItem[], setItems
         
         // Generate a new ID if none exists
         if (!firearm.id) {
-          firearm.id = crypto.randomUUID();
+          firearm.id = generateUUID();
         }
         
         const { data, error } = await supabase

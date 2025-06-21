@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,6 +10,7 @@ interface SearchBoxProps {
 const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchExpanded, setSearchExpanded] = useState<boolean>(false);
+  const [lastSearchedQuery, setLastSearchedQuery] = useState<string>('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
   const isMobile = useIsMobile();
@@ -33,6 +33,11 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng()
           };
+          
+          // Update the search query to reflect what was actually searched
+          const searchedText = place.formatted_address || place.name || searchQuery;
+          setSearchQuery(searchedText);
+          setLastSearchedQuery(searchedText);
           
           onSearch(position);
         }
@@ -61,6 +66,9 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
     
     if (!searchQuery.trim()) return;
     
+    // Update the last searched query
+    setLastSearchedQuery(searchQuery.trim());
+    
     if (searchBoxRef.current) {
       const searchBox = document.getElementById('pac-input') as HTMLInputElement;
       if (searchBox) {
@@ -77,6 +85,25 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
     
     if (isMobile) {
       setSearchExpanded(false);
+    }
+  };
+
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Handle input focus to show the last searched query if input is empty
+  const handleInputFocus = () => {
+    if (!searchQuery && lastSearchedQuery) {
+      setSearchQuery(lastSearchedQuery);
+    }
+  };
+
+  // Handle input blur to retain the last searched query if input becomes empty
+  const handleInputBlur = () => {
+    if (!searchQuery.trim() && lastSearchedQuery) {
+      setSearchQuery(lastSearchedQuery);
     }
   };
 
@@ -121,7 +148,9 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
               placeholder="Search for shooting ranges, gun shops..."
               className="w-full px-4 py-3 outline-none bg-transparent text-foreground"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <button 
               type="submit" 

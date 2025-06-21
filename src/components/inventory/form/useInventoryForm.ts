@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FirearmItem } from '../InventoryItem';
 import { useImageUploadService } from './ImageUploadService';
 import { useToast } from '@/hooks/use-toast';
+import { generateUUID } from '@/lib/utils';
 
 const defaultItem: FirearmItem = {
   id: '',
@@ -44,7 +45,7 @@ export const useInventoryForm = (isOpen: boolean, editItem: FirearmItem | null, 
         console.log('Creating new item with fresh UUID');
         setFormData({
           ...defaultItem,
-          id: crypto.randomUUID()
+          id: generateUUID()
         });
         setImageFile(null);
       }
@@ -109,7 +110,7 @@ export const useInventoryForm = (isOpen: boolean, editItem: FirearmItem | null, 
     // Ensure we have a valid ID for new items
     if (!formData.id) {
       console.log('No ID found, generating new UUID');
-      formData.id = crypto.randomUUID();
+      formData.id = generateUUID();
     }
     
     console.log('Submitting form with data:', formData);
