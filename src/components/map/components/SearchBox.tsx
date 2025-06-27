@@ -1,15 +1,15 @@
-
-import React, { useRef, useEffect, useState } from 'react';
-import { Search, X } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import React, { useRef, useEffect, useState } from "react";
+import { Search, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SearchBoxProps {
   onSearch: (position: google.maps.LatLngLiteral) => void;
   isLoaded: boolean;
+  selectedPlaceLabel?: string;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded, selectedPlaceLabel }) => {
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchExpanded, setSearchExpanded] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
@@ -18,27 +18,35 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
   // Initialize the SearchBox with the input reference
   const initializeSearchBox = () => {
     if (!isLoaded || !searchInputRef.current) return;
-    
+
     const searchBox = new google.maps.places.SearchBox(searchInputRef.current);
     searchBoxRef.current = searchBox;
-    
-    searchBox.addListener('places_changed', () => {
+
+    searchBox.addListener("places_changed", () => {
       const places = searchBox.getPlaces();
-      
+
       if (places && places.length > 0) {
         const place = places[0];
-        
+
+        // const fullDisplay = place.formatted_address || place.name || "";
+
+        if (place.formatted_address) {
+          setSearchQuery(place.formatted_address);
+        } else if (place.name) {
+          setSearchQuery(place.name);
+        }
+
         if (place.geometry && place.geometry.location) {
           const position = {
             lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
+            lng: place.geometry.location.lng(),
           };
-          
+
           onSearch(position);
         }
       }
     });
-    
+
     return () => {
       if (searchBox) {
         google.maps.event.clearInstanceListeners(searchBox);
@@ -46,6 +54,14 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
       searchBoxRef.current = null;
     };
   };
+
+  useEffect(() => {
+    if (selectedPlaceLabel) {
+      console.log("search", selectedPlaceLabel);
+      searchInputRef.current.value = "";
+      // setSearchQuery(() => selectedPlaceLabel); // updates the visible input box
+    }
+  }, [selectedPlaceLabel]);
 
   // Effect to initialize the SearchBox once the map is loaded
   useEffect(() => {
@@ -58,23 +74,23 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!searchQuery.trim()) return;
-    
-    if (searchBoxRef.current) {
-      const searchBox = document.getElementById('pac-input') as HTMLInputElement;
-      if (searchBox) {
-        const enterEvent = new KeyboardEvent('keydown', {
-          key: 'Enter',
-          code: 'Enter',
-          keyCode: 13,
-          which: 13,
-          bubbles: true
-        });
-        searchBox.dispatchEvent(enterEvent);
-      }
-    }
-    
+
+    // if (searchBoxRef.current) {
+    //   const searchBox = document.getElementById('pac-input') as HTMLInputElement;
+    //   if (searchBox) {
+    //     const enterEvent = new KeyboardEvent('keydown', {
+    //       key: 'Enter',
+    //       code: 'Enter',
+    //       keyCode: 13,
+    //       which: 13,
+    //       bubbles: true
+    //     });
+    //     searchBox.dispatchEvent(enterEvent);
+    //   }
+    // }
+
     if (isMobile) {
       setSearchExpanded(false);
     }
@@ -95,17 +111,17 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
       )}
 
       {(!isMobile || searchExpanded) && (
-        <div className={`absolute z-20 transition-all duration-300 ${
-          isMobile 
-            ? "top-4 left-4 right-4" 
-            : "top-4 left-0 right-0 mx-auto px-4 max-w-2xl"
-        }`}>
-          <form 
+        <div
+          className={`absolute z-20 transition-all duration-300 ${
+            isMobile ? "top-4 left-4 right-4" : "top-4 left-0 right-0 mx-auto px-4 max-w-2xl"
+          }`}
+        >
+          <form
             onSubmit={handleSearchSubmit}
             className="relative flex items-center bg-background/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden border border-primary/30 neon-glow"
           >
             {isMobile && (
-              <button 
+              <button
                 type="button"
                 className="p-3 text-primary"
                 onClick={() => setSearchExpanded(false)}
@@ -120,11 +136,11 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, isLoaded }) => {
               type="text"
               placeholder="Search for shooting ranges, gun shops..."
               className="w-full px-4 py-3 outline-none bg-transparent text-foreground"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              // value={searchQuery}
+              // onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="p-3 text-primary hover:text-primary/80 transition-colors"
               aria-label="Search"
             >

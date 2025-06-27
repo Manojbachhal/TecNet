@@ -145,10 +145,7 @@ const Classifieds = () => {
 
   const handleSold = async (classified: Classified) => {
     try {
-      await supabase
-        .from("classifieds")
-        .update({ is_sold: true })
-        .eq("id", classified.id);
+      await supabase.from("classifieds").update({ is_sold: true }).eq("id", classified.id);
 
       toast({
         title: "Item Marked as Sold",
@@ -186,7 +183,7 @@ const Classifieds = () => {
           />
 
           <ClassifiedsList
-            classifieds={classifieds.filter(item => !item.isSold)}
+            classifieds={classifieds.filter((item) => !item.isSold)}
             isLoading={isLoading}
             searchTerm={searchTerm}
             isOwner={isOwner}

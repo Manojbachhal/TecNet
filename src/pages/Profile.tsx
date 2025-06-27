@@ -27,20 +27,20 @@ const Profile = () => {
       navigate("/auth");
       return;
     }
-    
+
     fetchProfile();
   }, [user, navigate]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from("profiles")
         .select("username, bio, location, phone_number, avatar_url, location_verified")
         .eq("id", user?.id)
         .single();
-      
+
       if (error) {
         console.error("Error fetching profile:", error);
       } else if (data) {
@@ -63,7 +63,7 @@ const Profile = () => {
   const updateProfile = async () => {
     try {
       setLoading(true);
-      
+
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -74,7 +74,7 @@ const Profile = () => {
           updated_at: new Date().toISOString(),
         })
         .eq("id", user?.id);
-      
+
       if (error) {
         toast({
           title: "Error updating profile",
@@ -86,6 +86,7 @@ const Profile = () => {
           title: "Profile updated",
           description: "Your profile has been updated successfully.",
         });
+        await fetchProfile();
       }
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -116,14 +117,14 @@ const Profile = () => {
       <Navbar />
       <div className="container max-w-6xl py-10 pt-24">
         <div className="flex flex-col md:flex-row items-start gap-6">
-          <ProfileOverview 
-            user={user} 
-            profileData={profileData} 
-            isLocationVerified={isLocationVerified} 
+          <ProfileOverview
+            user={user}
+            profileData={profileData}
+            isLocationVerified={isLocationVerified}
             setProfileData={setProfileData}
           />
 
-          <ProfileTabs 
+          <ProfileTabs
             user={user}
             profileData={profileData}
             isLocationVerified={isLocationVerified}

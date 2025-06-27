@@ -1,74 +1,89 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
-import { Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import FullscreenMapView from './FullscreenMapView';
-import SearchBox from './components/SearchBox';
-import MapControls from './components/MapControls';
-import MapMarkers from './components/MapMarkers';
-import LocationInfoWindow from './components/LocationInfoWindow';
-import { mapStyles } from './utils/mapStyles';
-import { useUserLocation, useNearbySearch, useStreetView, useGunLocations } from './utils/mapHooks';
-import { getPlaceType } from './utils/markerUtils';
-import { 
-  mapContainerStyle, 
-  defaultCenter, 
-  GOOGLE_MAPS_API_KEY, 
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import FullscreenMapView from "./FullscreenMapView";
+import SearchBox from "./components/SearchBox";
+import MapControls from "./components/MapControls";
+import MapMarkers from "./components/MapMarkers";
+import LocationInfoWindow from "./components/LocationInfoWindow";
+import { mapStyles } from "./utils/mapStyles";
+import { useUserLocation, useNearbySearch, useStreetView, useGunLocations } from "./utils/mapHooks";
+import { getPlaceType } from "./utils/markerUtils";
+import {
+  mapContainerStyle,
+  defaultCenter,
+  GOOGLE_MAPS_API_KEY,
   googleMapsLibraries,
-  GunLocation, 
+  GunLocation,
   PlaceResult,
-  MapContainerProps 
-} from './types';
+  MapContainerProps,
+} from "./types";
 
-export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter }: MapContainerProps) {
+export default function MapContainer({
+  apiKey,
+  onOpenPantoneView,
+  initialCenter,
+}: MapContainerProps) {
   const [selectedLocation, setSelectedLocation] = useState<GunLocation | null>(null);
   const [searchRadius, setSearchRadius] = useState<number>(10000); // 10km default for better coverage
   const [showLegend, setShowLegend] = useState<boolean>(false);
   const [showRadiusControl, setShowRadiusControl] = useState<boolean>(false);
   const [showMapTypeControl, setShowMapTypeControl] = useState<boolean>(false);
-  const [mapType, setMapType] = useState<string>('roadmap');
+  const [mapType, setMapType] = useState<string>("roadmap");
   const [mapLoaded, setMapLoaded] = useState<boolean>(false);
   const [initialSearchDone, setInitialSearchDone] = useState<boolean>(false);
   const [showFullscreenMap, setShowFullscreenMap] = useState<boolean>(false);
-  
+
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const mapRef = useRef<google.maps.Map | null>(null);
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
   const streetViewServiceRef = useRef<google.maps.StreetViewService | null>(null);
-  
+
   const { userPosition, getUserLocation, setUserPosition } = useUserLocation();
-  const { placeResults, isSearching, setPlaceResults, searchNearbyGunPlaces } = useNearbySearch(placesServiceRef, searchRadius);
-  const { streetViewAvailable, setStreetViewAvailable, checkStreetViewAvailability, initializeStreetView } = useStreetView();
+  const { placeResults, isSearching, setPlaceResults, searchNearbyGunPlaces } = useNearbySearch(
+    placesServiceRef,
+    searchRadius
+  );
+  const {
+    streetViewAvailable,
+    setStreetViewAvailable,
+    checkStreetViewAvailability,
+    initializeStreetView,
+  } = useStreetView();
   const gunLocations = useGunLocations();
 
   const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
+    id: "google-map-script",
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: googleMapsLibraries
+    libraries: googleMapsLibraries,
   });
 
-  const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-    if (e.latLng) {
-      const position = {
-        lat: e.latLng.lat(),
-        lng: e.latLng.lng()
-      };
-      
-      if (mapRef.current) {
-        mapRef.current.panTo(position);
-        mapRef.current.setZoom(11);
+  const handleMapClick = useCallback(
+    (e: google.maps.MapMouseEvent) => {
+      if (e.latLng) {
+        const position = {
+          lat: e.latLng.lat(),
+          lng: e.latLng.lng(),
+        };
+
+        if (mapRef.current) {
+          mapRef.current.panTo(position);
+          mapRef.current.setZoom(11);
+        }
+
+        searchNearbyGunPlaces(position);
+
+        toast({
+          title: "Searching new location",
+          description: "Looking for firearms-related businesses in the selected area.",
+        });
       }
-      
-      searchNearbyGunPlaces(position);
-      
-      toast({
-        title: "Searching new location",
-        description: "Looking for firearms-related businesses in the selected area."
-      });
-    }
-  }, [searchNearbyGunPlaces, toast]);
+    },
+    [searchNearbyGunPlaces, toast]
+  );
 
   const handleMapTypeChange = (type: string) => {
     setMapType(type);
@@ -95,62 +110,76 @@ export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter 
         mapRef.current.setZoom(11);
       }
       searchNearbyGunPlaces(initialCenter);
-      
+
       toast({
         title: "Using profile location",
-        description: "Searching for firearms-related businesses near your profile location."
+        description: "Searching for firearms-related businesses near your profile location.",
       });
     }
   }, [initialCenter, searchNearbyGunPlaces, toast]);
 
-  const handleMarkerClick = useCallback((location: GunLocation) => {
-    setSelectedLocation(location);
-    checkStreetViewAvailability(location.position, streetViewServiceRef.current);
-  }, [checkStreetViewAvailability]);
+  const handleMarkerClick = useCallback(
+    (location: GunLocation) => {
+      setSelectedLocation(location);
+      checkStreetViewAvailability(location.position, streetViewServiceRef.current);
+    },
+    [checkStreetViewAvailability]
+  );
 
-  const handlePlaceResultClick = useCallback((place: PlaceResult) => {
-    const locationFromPlace: GunLocation = {
-      id: place.id,
-      name: place.name,
-      type: getPlaceType(place.types),
-      position: place.position,
-      city: place.address,
-      address: place.address
-    };
-    
-    setSelectedLocation(locationFromPlace);
-    checkStreetViewAvailability(place.position, streetViewServiceRef.current);
-  }, [checkStreetViewAvailability]);
+  const handlePlaceResultClick = useCallback(
+    (place: PlaceResult) => {
+      const locationFromPlace: GunLocation = {
+        id: place.id,
+        name: place.name,
+        type: getPlaceType(place.types),
+        position: place.position,
+        city: place.address,
+        address: place.address,
+      };
 
-  const handleSearch = useCallback((position: google.maps.LatLngLiteral) => {
-    if (mapRef.current) {
-      mapRef.current.panTo(position);
-      mapRef.current.setZoom(12);
-    }
-    
-    setPlaceResults([]);
-    searchNearbyGunPlaces(position);
-  }, [searchNearbyGunPlaces, setPlaceResults]);
+      console.log("here ", locationFromPlace);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-    
-    placesServiceRef.current = new google.maps.places.PlacesService(map);
-    
-    streetViewServiceRef.current = new google.maps.StreetViewService();
-    
-    setMapLoaded(true);
-    
-    map.setZoom(7);
-    
-    map.addListener("click", handleMapClick);
-  }, [handleMapClick]);
+      setSelectedLocation(() => locationFromPlace);
+      checkStreetViewAvailability(place.position, streetViewServiceRef.current);
+    },
+    [checkStreetViewAvailability]
+  );
+
+  const handleSearch = useCallback(
+    (position: google.maps.LatLngLiteral) => {
+      if (mapRef.current) {
+        mapRef.current.panTo(position);
+        mapRef.current.setZoom(12);
+      }
+
+      setPlaceResults([]);
+      searchNearbyGunPlaces(position);
+    },
+    [searchNearbyGunPlaces, setPlaceResults]
+  );
+
+  const onLoad = useCallback(
+    (map: google.maps.Map) => {
+      mapRef.current = map;
+
+      placesServiceRef.current = new google.maps.places.PlacesService(map);
+
+      streetViewServiceRef.current = new google.maps.StreetViewService();
+
+      setMapLoaded(true);
+
+      map.setZoom(7);
+
+      map.addListener("click", handleMapClick);
+    },
+    [handleMapClick]
+  );
 
   const onUnmount = useCallback(() => {
     if (mapRef.current) {
       google.maps.event.clearListeners(mapRef.current, "click");
     }
-    
+
     mapRef.current = null;
     placesServiceRef.current = null;
     streetViewServiceRef.current = null;
@@ -164,7 +193,7 @@ export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter 
         searchNearbyGunPlaces(center);
         setInitialSearchDone(true);
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [mapLoaded, searchNearbyGunPlaces, userPosition, initialSearchDone, initialCenter]);
@@ -192,9 +221,10 @@ export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter 
 
   return (
     <div className="relative w-full h-full">
-      <SearchBox 
+      <SearchBox
         onSearch={handleSearch}
         isLoaded={isLoaded}
+        selectedPlaceLabel={selectedLocation?.name + " " + selectedLocation?.address || ""}
       />
 
       <GoogleMap
@@ -212,10 +242,10 @@ export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter 
           zoomControl: !isMobile,
           scaleControl: !isMobile,
           rotateControl: false,
-          clickableIcons: false
+          clickableIcons: false,
         }}
       >
-        <MapMarkers 
+        <MapMarkers
           gunLocations={gunLocations}
           placeResults={placeResults}
           userPosition={userPosition}
@@ -224,7 +254,7 @@ export default function MapContainer({ apiKey, onOpenPantoneView, initialCenter 
         />
 
         {selectedLocation && (
-          <LocationInfoWindow 
+          <LocationInfoWindow
             selectedLocation={selectedLocation}
             onClose={() => setSelectedLocation(null)}
             streetViewAvailable={streetViewAvailable}

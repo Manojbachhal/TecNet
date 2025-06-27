@@ -91,7 +91,7 @@ const useTradingPage = () => {
         toast({
           title: "Authentication Required",
           description: "You must be signed in to create or edit listings.",
-          variant: "destructive"
+          variant: "destructive",
         });
         return false;
       }
@@ -109,7 +109,7 @@ const useTradingPage = () => {
         status: "active" as const,
         is_sold: false,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       if (editingId) {
@@ -120,9 +120,7 @@ const useTradingPage = () => {
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("trading_listings")
-          .insert([listingData]);
+        const { error } = await supabase.from("trading_listings").insert([listingData]);
 
         if (error) throw error;
       }
@@ -134,7 +132,7 @@ const useTradingPage = () => {
       toast({
         title: "Error",
         description: "Failed to save listing. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
@@ -215,7 +213,7 @@ const useTradingPage = () => {
         toast({
           title: "Authentication Required",
           description: "You must be signed in to mark items as sold.",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -223,10 +221,10 @@ const useTradingPage = () => {
       // Update the listing as sold
       const { error: updateError } = await supabase
         .from("trading_listings")
-        .update({ 
+        .update({
           is_sold: true,
           status: "sold" as const,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", id);
 
@@ -249,14 +247,14 @@ const useTradingPage = () => {
       await fetchListings();
       toast({
         title: "Success",
-        description: "Item marked as sold successfully."
+        description: "Item marked as sold successfully.",
       });
     } catch (error) {
       console.error("Error marking item as sold:", error);
       toast({
         title: "Error",
         description: "Failed to mark item as sold. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -295,10 +293,14 @@ const useTradingPage = () => {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case "newest":
-        filtered.sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+        filtered.sort(
+          (a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime()
+        );
         break;
       case "oldest":
-        filtered.sort((a, b) => new Date(a.postedDate).getTime() - new Date(b.postedDate).getTime());
+        filtered.sort(
+          (a, b) => new Date(a.postedDate).getTime() - new Date(b.postedDate).getTime()
+        );
         break;
     }
 
