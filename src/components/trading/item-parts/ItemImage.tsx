@@ -25,6 +25,7 @@ export default function ItemImage({
   onReport,
   isSold = false,
 }: ItemImageProps) {
+  console.log(favorite);
   const [imageError, setImageError] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>("");
 

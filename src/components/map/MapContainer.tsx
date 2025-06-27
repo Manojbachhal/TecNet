@@ -41,7 +41,7 @@ export default function MapContainer({
   const mapRef = useRef<google.maps.Map | null>(null);
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
   const streetViewServiceRef = useRef<google.maps.StreetViewService | null>(null);
-
+  const [postion, setPostion] = useState<any>();
   const { userPosition, getUserLocation, setUserPosition } = useUserLocation();
   const { placeResults, isSearching, setPlaceResults, searchNearbyGunPlaces } = useNearbySearch(
     placesServiceRef,
@@ -136,6 +136,7 @@ export default function MapContainer({
         city: place.address,
         address: place.address,
       };
+      console.log("first");
 
       console.log("here ", locationFromPlace);
 
@@ -154,9 +155,35 @@ export default function MapContainer({
 
       setPlaceResults([]);
       searchNearbyGunPlaces(position);
+      setPostion(position);
+      // test
     },
     [searchNearbyGunPlaces, setPlaceResults]
   );
+
+  // selecting on load
+
+  const isSamePosition = (a: google.maps.LatLngLiteral, b: google.maps.LatLngLiteral) => {
+    return Math.abs(a.lat - b.lat) < 0.0001 && Math.abs(a.lng - b.lng) < 0.0001;
+  };
+
+  useEffect(() => {
+    placeResults.forEach((ele) => {
+      console.log(ele, postion);
+      if (
+        ele.position &&
+        postion &&
+        postion.lat &&
+        postion.lng &&
+        isSamePosition(ele.position, postion)
+      ) {
+        handlePlaceResultClick({
+          ...ele,
+          types: ele?.types,
+        });
+      }
+    });
+  }, [placeResults, postion]);
 
   const onLoad = useCallback(
     (map: google.maps.Map) => {

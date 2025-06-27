@@ -296,6 +296,25 @@ export default function Ballistics() {
   const [trajectoryData, setTrajectoryData] = useState<TrajectoryPoint[]>([]);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState<boolean>(false);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    const bt = searchParams.get("bt");
+    const zr = searchParams.get("zr");
+    const ws = searchParams.get("ws");
+    const wa = searchParams.get("wa");
+
+    if (bt) setSelectedBulletType(bt);
+    if (zr) setZeroRange(parseInt(zr));
+    if (ws) setWindSpeed(parseInt(ws));
+    if (wa) setWindAngle(parseInt(wa));
+
+    // Recalculate trajectory after short delay to ensure state is updated
+    setTimeout(() => {
+      calculateAndUpdateTrajectory();
+    }, 150);
+  }, []);
+
   // Check for firearm data passed from inventory or trading
   useEffect(() => {
     if (location.state?.firearm) {
@@ -710,7 +729,7 @@ export default function Ballistics() {
                         step="5"
                       />
                       <Wind className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                      <div className="absolute right-9 top-2.5 text-xs text-muted-foreground">
                         {windAngle === 0
                           ? "Tail"
                           : windAngle === 90

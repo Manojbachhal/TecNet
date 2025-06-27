@@ -31,6 +31,16 @@ const useTradingPage = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
+      const { data: favorite, error: favoriteError } = await supabase
+        .from("favourites")
+        .select("*")
+        .eq("userId", session?.user?.id);
+
+      const favMap = new Map();
+      favorite.forEach((ele) => {
+        favMap.set(ele.tradeId, ele.userId);
+      });
+
       if (error) {
         throw error;
       }
@@ -47,7 +57,7 @@ const useTradingPage = () => {
           postedDate: item.created_at,
           images: item.image_url ? [item.image_url] : [],
           description: item.description,
-          favorite: false,
+          favorite: favMap.get(item.id) == session?.user?.id ? true : false,
           isSold: item.is_sold || false,
           owner_id: item.owner_id,
           listing_type: item.listing_type,
@@ -145,21 +155,59 @@ const useTradingPage = () => {
     }
   };
 
-  const handleToggleFavorite = async (id: string) => {
-    if (!session) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be signed in to favorite listings.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleToggleFavorite = async ({ userId, tradeId }: { userId: string; tradeId: string }) => {
+    try {
+      // Check if it already exists
+      const { data: existingData, error: favError } = await supabase
+        .from("favourites")
+        .select("id")
+        .eq("userId", userId)
+        .eq("tradeId", tradeId)
+        .maybeSingle();
 
-    const updatedListings = listings.map((item) =>
-      item.id === id ? { ...item, favorite: !item.favorite } : item
-    );
-    setListings(updatedListings);
+      if (favError) {
+        throw favError;
+      }
+
+      if (existingData) {
+        // If exists, delete it
+        await supabase.from("favourites").delete().eq("id", existingData.id);
+      } else {
+        // If not, insert new favorite
+        const data = { userId, tradeId, created_at: new Date().toISOString() };
+        await supabase.from("favourites").insert(data);
+      }
+
+      const updatedListings = listings.map((ele) => {
+        if (ele.id == tradeId && existingData) {
+          ele.favorite = false;
+        } else if (ele.id == tradeId) {
+          ele.favorite = true;
+        }
+        return ele;
+      });
+      setListings(updatedListings);
+      // fetchListings();
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
   };
+
+  // const handleToggleFavorite = async (id: string) => {
+  //   if (!session) {
+  //     toast({
+  //       title: "Authentication Required",
+  //       description: "You must be signed in to favorite listings.",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+
+  //   const updatedListings = listings.map((item) =>
+  //     item.id === id ? { ...item, favorite: !item.favorite } : item
+  //   );
+  //   setListings(updatedListings);
+  // };
 
   const handleEditListing = (id: string) => {
     const item = listings.find((item) => item.id === id);

@@ -48,16 +48,14 @@ export default function TradingItem({
           images={normalizeImages(item.images)}
           title={item.title}
           price={item.price}
+          favorite={item.favorite}
           isOwner={isOwner}
-          onToggleFavorite={() => onToggleFavorite(item.id)}
+          onToggleFavorite={() => onToggleFavorite({ userId: session?.user?.id, tradeId: item.id })}
           onReport={() => setIsReportDialogOpen(true)}
           isSold={item.isSold}
         />
 
-        <ItemHeader
-          title={item.title}
-          location={item.location}
-        />
+        <ItemHeader title={item.title} location={item.location} />
 
         <ItemContent
           description={item.description}
@@ -86,11 +84,7 @@ export default function TradingItem({
         </CardFooter>
       </Card>
 
-      <AnalysisDialogWrapper
-        isOpen={isAnalysisOpen}
-        onOpenChange={setIsAnalysisOpen}
-        item={item}
-      />
+      <AnalysisDialogWrapper isOpen={isAnalysisOpen} onOpenChange={setIsAnalysisOpen} item={item} />
 
       <DeleteConfirmDialogWrapper
         isOpen={isDeleteConfirmOpen}

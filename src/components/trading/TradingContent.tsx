@@ -13,7 +13,7 @@ interface TradingContentProps {
   activeTab: string;
   sessionUsername: string | null;
   onContact: (id: string) => void;
-  onToggleFavorite: (id: string) => void;
+  onToggleFavorite: ({ userId, tradeId }: { userId: string; tradeId: string }) => void;
   onEdit: (id: string) => void;
   onSold: (id: string) => void;
   onDelete: (id: string) => Promise<boolean>;

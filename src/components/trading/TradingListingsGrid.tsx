@@ -6,7 +6,7 @@ import { ReportData } from "./ReportListingDialog";
 interface TradingListingsGridProps {
   listings: ListingItem[];
   onContact: (id: string) => void;
-  onToggleFavorite: (id: string) => void;
+  onToggleFavorite: ({ userId, tradeId }: { userId: string; tradeId: string }) => void;
   onEdit: (id: string) => void;
   onSold: (id: string) => void;
   onDelete: (id: string) => Promise<boolean>;
@@ -26,6 +26,7 @@ const TradingListingsGrid = ({
   sessionUsername,
   activeTab,
 }: TradingListingsGridProps) => {
+  console.log(listings);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
       {listings.map((item) => (
