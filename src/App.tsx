@@ -28,6 +28,7 @@ import Messages from "./pages/Messages";
 import Footer from "./components/layout/Footer";
 import Admin from "./pages/Admin";
 import Navbar from "@/components/layout/Navbar";
+import ComingSoon from "./pages/ComingSoon";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,7 @@ const App = () => (
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="*" element={<NotFound />} />
+                  <Route path="/coming-soon" element={<ComingSoon />} />
                 </Routes>
               </div>
               <Footer />
