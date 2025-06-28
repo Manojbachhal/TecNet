@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Shield, Flag, CheckCircle } from "lucide-react";
-import { getReliableFallbackImage, getFirstValidImage, normalizeImages } from "../utils/imageUtils";
+import {
+  getReliableFallbackImage,
+  getFirstValidImage,
+  normalizeImages,
+} from "../utils/imageUtils";
 
 interface ItemImageProps {
   title: string;
@@ -67,11 +71,13 @@ export default function ItemImage({
             onClick={onToggleFavorite}
             title="Add to favorites"
           >
-            <Heart className={`h-5 w-5 ${favorite ? "fill-destructive" : ""}`} />
+            <Heart
+              className={`h-5 w-5 ${favorite ? "fill-destructive" : ""}`}
+            />
           </Button>
         )}
 
-        {!isOwner && (
+        {/* {!isOwner && (
           <Button
             variant="ghost"
             size="icon"
@@ -81,10 +87,12 @@ export default function ItemImage({
           >
             <Flag className="h-5 w-5" />
           </Button>
-        )}
+        )} */}
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-        <Badge className="text-lg font-bold bg-primary">${price.toLocaleString()}</Badge>
+        <Badge className="text-lg font-bold bg-primary">
+          ${price.toLocaleString()}
+        </Badge>
         {isSold && (
           <Badge variant="secondary" className="bg-green-600 text-white">
             <CheckCircle className="h-3 w-3 mr-1" />
