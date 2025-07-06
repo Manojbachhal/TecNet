@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { motion } from "framer-motion";
 import TradingHeader from "@/components/trading/TradingHeader";
@@ -18,7 +18,8 @@ import { useAuth } from "@/contexts/AuthContext";
 const Trading = () => {
   const { session } = useAuth();
   const { userFirearms, initialFirearm } = useInventoryIntegration(session);
-  
+
+  console.log(initialFirearm, "inti", userFirearms);
   const {
     isLoading,
     listings,
@@ -45,9 +46,11 @@ const Trading = () => {
     handleReportListing,
     handleSold,
     refetchListings,
+    editItem,
   } = useTradingPage();
 
   const location = useLocation();
+  const initialFirearmFromInventory = location.state?.listItem || null;
 
   useEffect(() => {
     if (location.state?.action === "createListing") {
@@ -103,6 +106,7 @@ const Trading = () => {
         onClose={() => setIsCreateDialogOpen(false)}
         onSave={handleSaveListing}
         userFirearms={userFirearms}
+        editItem={editItem}
         initialFirearm={initialFirearm}
       />
     </>

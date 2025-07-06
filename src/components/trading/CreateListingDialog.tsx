@@ -52,16 +52,10 @@ const CreateListingDialog = ({
   const [images, setImages] = useState<string[]>([]);
   const [selectedFirearm, setSelectedFirearm] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [showNoInventoryDialog, setShowNoInventoryDialog] = useState(false);
 
   const navigate = useNavigate();
-
-  console.log("Rendering CreateListingDialog with initialFirearm:", initialFirearm);
-  useEffect(() => {
-    if (isOpen && !editItem && userFirearms.length === 0) {
-      setShowNoInventoryDialog(true);
-    }
-  }, [isOpen, editItem, userFirearms]);
+  const showNoInventoryDialog = isOpen && !editItem && userFirearms.length === 0 && !initialFirearm;
+  console.log(editItem, "editItem");
 
   useEffect(() => {
     if (editItem) {
@@ -134,7 +128,8 @@ const CreateListingDialog = ({
 
     try {
       // Ensure we have a firearm_id if we're creating from inventory
-      const firearmId = initialFirearm?.id || selectedFirearm;
+      // const firearmId = initialFirearm?.id || selectedFirearm;/
+      const firearmId = editItem?.id || initialFirearm?.id || selectedFirearm;
 
       if (!editItem) {
         const { data: existing, error } = await supabase
@@ -423,44 +418,45 @@ const CreateListingDialog = ({
           </DialogContent>
         </Dialog>
       )}
-      <Dialog
-        open={showNoInventoryDialog}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowNoInventoryDialog(false);
-            onClose();
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle>No Firearms in Inventory</DialogTitle>
-            <DialogDescription>
-              You must add at least one item to your inventory before creating a listing.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowNoInventoryDialog(false);
-                onClose(); // Close the listing modal too
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setShowNoInventoryDialog(false);
-                onClose(); // Close the listing modal
-                navigate("/inventory"); // Go to inventory page
-              }}
-            >
-              Create Inventory
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+      {showNoInventoryDialog && (
+        <Dialog
+          open={showNoInventoryDialog}
+          onOpenChange={(open) => {
+            if (!open) onClose();
+          }}
+        >
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>No Firearms in Inventory</DialogTitle>
+              <DialogDescription>
+                You must add at least one item to your inventory before creating a listing.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                // onClick={() => {
+                //   setShowNoInventoryDialog(false);
+                //   onClose(); // Close the listing modal too
+                // }}
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  // setShowNoInventoryDialog(false);
+                  onClose(); // Close the listing modal
+                  navigate("/inventory"); // Go to inventory page
+                }}
+              >
+                Create Inventory
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

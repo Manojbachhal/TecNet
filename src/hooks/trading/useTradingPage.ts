@@ -106,7 +106,7 @@ const useTradingPage = () => {
         return false;
       }
 
-      const listingData = {
+      const listingData: any = {
         title: listing.title,
         price: listing.price,
         location: listing.location,
@@ -123,6 +123,9 @@ const useTradingPage = () => {
       };
 
       if (editingId) {
+        delete listingData.firearm_id;
+        listingData.id = listing.id;
+        console.log(editingId, listingData, "testsss");
         const { error } = await supabase
           .from("trading_listings")
           .update(listingData)
@@ -212,6 +215,7 @@ const useTradingPage = () => {
   const handleEditListing = (id: string) => {
     const item = listings.find((item) => item.id === id);
     if (item) {
+      console.log(item, "item");
       setEditItem(item);
       setIsCreateDialogOpen(true);
     }

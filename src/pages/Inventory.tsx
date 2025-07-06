@@ -103,7 +103,7 @@ export default function Inventory() {
   };
 
   const handleListForTrading = async (item: FirearmItem) => {
-    console.log('Listing item for trading:', item);
+    console.log("Listing item for trading:", item);
     const { data, error } = await supabase
       .from("trading_listings")
       .select("*")
@@ -131,7 +131,7 @@ export default function Inventory() {
         notes: item.notes,
         image: item.image,
         image_url: item.image_url,
-        user_id: user?.id
+        user_id: user?.id,
       };
 
       navigate("/trading", {
