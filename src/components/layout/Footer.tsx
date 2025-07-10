@@ -27,7 +27,8 @@ const Footer = () => {
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-foreground">TacNet™</h3>
             <p className="text-sm text-muted-foreground">
-              Your comprehensive tactical network for firearms enthusiasts and range finders.
+              Your comprehensive tactical network for firearms enthusiasts and
+              range finders.
             </p>
             <div className="flex space-x-4 pt-2">
               <a
@@ -73,7 +74,9 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-foreground">Quick Links</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              Quick Links
+            </h3>
             <ul className="space-y-2">
               <li>
                 <Link

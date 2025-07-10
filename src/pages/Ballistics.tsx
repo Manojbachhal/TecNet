@@ -57,8 +57,22 @@ import { caliberToBulletType } from "@/components/ballistics/utils/ballisticsMap
 
 // Define bullet types with their ballistic coefficients
 const bulletTypes = [
-  { id: "fmj9mm", name: "9mm FMJ", bc: 0.125, weight: 115, diameter: 0.355, initialVelocity: 1180 },
-  { id: "223rem", name: ".223 Rem", bc: 0.243, weight: 55, diameter: 0.224, initialVelocity: 3240 },
+  {
+    id: "fmj9mm",
+    name: "9mm FMJ",
+    bc: 0.125,
+    weight: 115,
+    diameter: 0.355,
+    initialVelocity: 1180,
+  },
+  {
+    id: "223rem",
+    name: ".223 Rem",
+    bc: 0.243,
+    weight: 55,
+    diameter: 0.224,
+    initialVelocity: 3240,
+  },
   {
     id: "308win",
     name: ".308 Win",
@@ -75,7 +89,14 @@ const bulletTypes = [
     diameter: 0.264,
     initialVelocity: 2710,
   },
-  { id: "45acp", name: ".45 ACP", bc: 0.195, weight: 230, diameter: 0.452, initialVelocity: 850 },
+  {
+    id: "45acp",
+    name: ".45 ACP",
+    bc: 0.195,
+    weight: 230,
+    diameter: 0.452,
+    initialVelocity: 850,
+  },
   {
     id: "300wm",
     name: ".300 Win Mag",
@@ -92,7 +113,14 @@ const bulletTypes = [
     diameter: 0.729,
     initialVelocity: 1560,
   },
-  { id: "custom", name: "Custom", bc: 0.3, weight: 150, diameter: 0.308, initialVelocity: 2700 },
+  {
+    id: "custom",
+    name: "Custom",
+    bc: 0.3,
+    weight: 150,
+    diameter: 0.308,
+    initialVelocity: 2700,
+  },
 ];
 
 // Wind speed options
@@ -273,7 +301,8 @@ export default function Ballistics() {
   const location = useLocation();
 
   // Bullet and environment parameters
-  const [selectedBulletType, setSelectedBulletType] = useState<string>("223rem");
+  const [selectedBulletType, setSelectedBulletType] =
+    useState<string>("223rem");
   const [customBullet, setCustomBullet] = useState(
     bulletTypes.find((b) => b.id === "custom") || bulletTypes[7]
   );
@@ -294,7 +323,8 @@ export default function Ballistics() {
 
   // Trajectory data
   const [trajectoryData, setTrajectoryData] = useState<TrajectoryPoint[]>([]);
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState<boolean>(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -410,7 +440,8 @@ export default function Ballistics() {
     } catch (error) {
       toast({
         title: "Calculation Error",
-        description: "There was an error calculating the trajectory. Please check your inputs.",
+        description:
+          "There was an error calculating the trajectory. Please check your inputs.",
         variant: "destructive",
       });
     }
@@ -459,7 +490,9 @@ export default function Ballistics() {
     if (trajectoryData.length === 0) return 0;
 
     // Different energy thresholds based on bullet type
-    const isRifle = ["223rem", "308win", "6.5cm", "300wm"].includes(selectedBulletType);
+    const isRifle = ["223rem", "308win", "6.5cm", "300wm"].includes(
+      selectedBulletType
+    );
     const energyThreshold = isRifle ? 1000 : 300;
 
     for (let i = 0; i < trajectoryData.length; i++) {
@@ -527,7 +560,10 @@ export default function Ballistics() {
   };
 
   // Handler for custom bullet updates
-  const updateCustomBullet = (property: keyof typeof customBullet, value: number) => {
+  const updateCustomBullet = (
+    property: keyof typeof customBullet,
+    value: number
+  ) => {
     setCustomBullet((prev) => ({
       ...prev,
       [property]: value,
@@ -575,12 +611,17 @@ export default function Ballistics() {
                     <Target className="h-5 w-5 mr-2 text-primary" />
                     Ballistic Parameters
                   </CardTitle>
-                  <CardDescription>Select bullet and environment settings</CardDescription>
+                  <CardDescription>
+                    Select bullet and environment settings
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="bulletType">Bullet Type</Label>
-                    <Select value={selectedBulletType} onValueChange={setSelectedBulletType}>
+                    <Select
+                      value={selectedBulletType}
+                      onValueChange={setSelectedBulletType}
+                    >
                       <SelectTrigger id="bulletType">
                         <SelectValue placeholder="Select bullet type" />
                       </SelectTrigger>
@@ -610,7 +651,12 @@ export default function Ballistics() {
                             id="bc"
                             type="number"
                             value={customBullet.bc}
-                            onChange={(e) => updateCustomBullet("bc", parseFloat(e.target.value))}
+                            onChange={(e) =>
+                              updateCustomBullet(
+                                "bc",
+                                parseFloat(e.target.value)
+                              )
+                            }
                             step="0.001"
                             min="0.1"
                             max="1"
@@ -627,7 +673,10 @@ export default function Ballistics() {
                             type="number"
                             value={customBullet.weight}
                             onChange={(e) =>
-                              updateCustomBullet("weight", parseFloat(e.target.value))
+                              updateCustomBullet(
+                                "weight",
+                                parseFloat(e.target.value)
+                              )
                             }
                             step="1"
                             min="1"
@@ -644,7 +693,10 @@ export default function Ballistics() {
                             type="number"
                             value={customBullet.diameter}
                             onChange={(e) =>
-                              updateCustomBullet("diameter", parseFloat(e.target.value))
+                              updateCustomBullet(
+                                "diameter",
+                                parseFloat(e.target.value)
+                              )
                             }
                             step="0.001"
                             min="0.1"
@@ -661,7 +713,10 @@ export default function Ballistics() {
                             type="number"
                             value={customBullet.initialVelocity}
                             onChange={(e) =>
-                              updateCustomBullet("initialVelocity", parseFloat(e.target.value))
+                              updateCustomBullet(
+                                "initialVelocity",
+                                parseFloat(e.target.value)
+                              )
                             }
                             step="10"
                             min="100"
@@ -744,7 +799,9 @@ export default function Ballistics() {
                   </div>
 
                   <Button
-                    onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+                    onClick={() =>
+                      setShowAdvancedSettings(!showAdvancedSettings)
+                    }
                     variant="outline"
                     className="w-full"
                   >
@@ -753,7 +810,9 @@ export default function Ballistics() {
                     ) : (
                       <ChevronDown className="mr-2 h-4 w-4" />
                     )}
-                    {showAdvancedSettings ? "Hide Advanced Settings" : "Show Advanced Settings"}
+                    {showAdvancedSettings
+                      ? "Hide Advanced Settings"
+                      : "Show Advanced Settings"}
                   </Button>
 
                   {showAdvancedSettings && (
@@ -765,12 +824,16 @@ export default function Ballistics() {
                       className="space-y-4 border-t pt-4 mt-4"
                     >
                       <div className="space-y-2">
-                        <Label htmlFor="sightHeight">Sight Height (inches)</Label>
+                        <Label htmlFor="sightHeight">
+                          Sight Height (inches)
+                        </Label>
                         <Input
                           id="sightHeight"
                           type="number"
                           value={sightHeight}
-                          onChange={(e) => setSightHeight(parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            setSightHeight(parseFloat(e.target.value))
+                          }
                           step="0.1"
                           min="0.5"
                           max="3"
@@ -814,7 +877,9 @@ export default function Ballistics() {
                               id="temperature"
                               type="number"
                               value={temperature}
-                              onChange={(e) => setTemperature(parseInt(e.target.value))}
+                              onChange={(e) =>
+                                setTemperature(parseInt(e.target.value))
+                              }
                               className="pl-7"
                               min="-20"
                               max="120"
@@ -831,7 +896,9 @@ export default function Ballistics() {
                             id="pressure"
                             type="number"
                             value={pressure}
-                            onChange={(e) => setPressure(parseFloat(e.target.value))}
+                            onChange={(e) =>
+                              setPressure(parseFloat(e.target.value))
+                            }
                             step="0.01"
                             min="20"
                             max="35"
@@ -846,7 +913,9 @@ export default function Ballistics() {
                             id="humidity"
                             type="number"
                             value={humidity}
-                            onChange={(e) => setHumidity(parseInt(e.target.value))}
+                            onChange={(e) =>
+                              setHumidity(parseInt(e.target.value))
+                            }
                             min="0"
                             max="100"
                           />
@@ -875,11 +944,18 @@ export default function Ballistics() {
                   )}
                 </CardContent>
                 <CardFooter className="flex justify-between flex-wrap gap-2">
-                  <Button variant="outline" onClick={handleReset} className="flex-1">
+                  <Button
+                    variant="outline"
+                    onClick={handleReset}
+                    className="flex-1"
+                  >
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Reset
                   </Button>
-                  <Button onClick={calculateAndUpdateTrajectory} className="flex-1">
+                  <Button
+                    onClick={calculateAndUpdateTrajectory}
+                    className="flex-1"
+                  >
                     <Crosshair className="mr-2 h-4 w-4" />
                     Calculate
                   </Button>
@@ -926,10 +1002,17 @@ export default function Ballistics() {
                             data={trajectoryData}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              opacity={0.7}
+                            />
                             <XAxis
                               dataKey="distance"
-                              label={{ value: "Distance (yards)", position: "bottom", offset: 0 }}
+                              label={{
+                                value: "Distance (yards)",
+                                position: "bottom",
+                                offset: 0,
+                              }}
                             />
                             <YAxis
                               label={{
@@ -944,10 +1027,16 @@ export default function Ballistics() {
                                 `${formatDecimal(value)} inches`,
                                 "Bullet Drop",
                               ]}
-                              labelFormatter={(label) => `Distance: ${label} yards`}
+                              labelFormatter={(label) =>
+                                `Distance: ${label} yards`
+                              }
                             />
                             <Legend verticalAlign="top" height={36} />
-                            <ReferenceLine y={0} stroke="#888" strokeDasharray="3 3" />
+                            <ReferenceLine
+                              y={0}
+                              stroke="#888"
+                              strokeDasharray="3 3"
+                            />
                             <ReferenceLine
                               y={3}
                               stroke="#66bb6a"
@@ -981,7 +1070,8 @@ export default function Ballistics() {
                         <div className="flex items-center">
                           <div className="w-3 h-3 rounded-full bg-[#66bb6a] mr-2"></div>
                           <span>
-                            Point Blank Range: {pointBlankRange.min}-{pointBlankRange.max} yds
+                            Point Blank Range: {pointBlankRange.min}-
+                            {pointBlankRange.max} yds
                           </span>
                         </div>
                       </div>
@@ -994,10 +1084,17 @@ export default function Ballistics() {
                             data={trajectoryData}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              opacity={0.7}
+                            />
                             <XAxis
                               dataKey="distance"
-                              label={{ value: "Distance (yards)", position: "bottom", offset: 0 }}
+                              label={{
+                                value: "Distance (yards)",
+                                position: "bottom",
+                                offset: 0,
+                              }}
                             />
                             <YAxis
                               label={{
@@ -1012,7 +1109,9 @@ export default function Ballistics() {
                                 `${formatDecimal(value)} fps`,
                                 "Velocity",
                               ]}
-                              labelFormatter={(label) => `Distance: ${label} yards`}
+                              labelFormatter={(label) =>
+                                `Distance: ${label} yards`
+                              }
                             />
                             <Legend verticalAlign="top" height={36} />
                             <ReferenceLine
@@ -1042,10 +1141,17 @@ export default function Ballistics() {
                             data={trajectoryData}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              opacity={0.7}
+                            />
                             <XAxis
                               dataKey="distance"
-                              label={{ value: "Distance (yards)", position: "bottom", offset: 0 }}
+                              label={{
+                                value: "Distance (yards)",
+                                position: "bottom",
+                                offset: 0,
+                              }}
                             />
                             <YAxis
                               label={{
@@ -1060,7 +1166,9 @@ export default function Ballistics() {
                                 `${formatDecimal(value)} ft-lbs`,
                                 "Energy",
                               ]}
-                              labelFormatter={(label) => `Distance: ${label} yards`}
+                              labelFormatter={(label) =>
+                                `Distance: ${label} yards`
+                              }
                             />
                             <Legend verticalAlign="top" height={36} />
                             <ReferenceLine
@@ -1090,7 +1198,9 @@ export default function Ballistics() {
 
                       <div className="mt-4 text-sm flex items-center">
                         <div className="w-3 h-3 rounded-full bg-[#4caf50] mr-2"></div>
-                        <span>Maximum Effective Range: {effectiveRange} yards</span>
+                        <span>
+                          Maximum Effective Range: {effectiveRange} yards
+                        </span>
                       </div>
                     </TabsContent>
 
@@ -1101,10 +1211,17 @@ export default function Ballistics() {
                             data={trajectoryData}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" opacity={0.7} />
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              opacity={0.7}
+                            />
                             <XAxis
                               dataKey="distance"
-                              label={{ value: "Distance (yards)", position: "bottom", offset: 0 }}
+                              label={{
+                                value: "Distance (yards)",
+                                position: "bottom",
+                                offset: 0,
+                              }}
                             />
                             <YAxis
                               label={{
@@ -1119,10 +1236,16 @@ export default function Ballistics() {
                                 `${formatDecimal(value)} inches`,
                                 "Wind Drift",
                               ]}
-                              labelFormatter={(label) => `Distance: ${label} yards`}
+                              labelFormatter={(label) =>
+                                `Distance: ${label} yards`
+                              }
                             />
                             <Legend verticalAlign="top" height={36} />
-                            <ReferenceLine y={0} stroke="#888" strokeDasharray="3 3" />
+                            <ReferenceLine
+                              y={0}
+                              stroke="#888"
+                              strokeDasharray="3 3"
+                            />
                             <Line
                               type="monotone"
                               dataKey="windage"
@@ -1155,7 +1278,11 @@ export default function Ballistics() {
                   </Tabs>
                 </CardContent>
                 <CardFooter className="pt-0 pb-4 flex justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={handleExportData}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportData}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Export Data
                   </Button>
@@ -1185,7 +1312,7 @@ export default function Ballistics() {
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
                   </Button> */}
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
@@ -1221,6 +1348,51 @@ export default function Ballistics() {
                   >
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
+                  </Button> */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const params = new URLSearchParams({
+                        bt: selectedBulletType,
+                        zr: zeroRange.toString(),
+                        ws: windSpeed.toString(),
+                        wa: windAngle.toString(),
+                      });
+                      const basePath = "/tacnet";
+                      const fullUrl = `${
+                        window.location.origin
+                      }${basePath}/ballistics?${params.toString()}`;
+
+                      // Try Clipboard API or fallback
+                      if (navigator?.clipboard?.writeText) {
+                        navigator.clipboard.writeText(fullUrl);
+                      } else {
+                        const textarea = document.createElement("textarea");
+                        textarea.value = fullUrl;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(textarea);
+                      }
+
+                      // Open WhatsApp share URL
+                      const encodedMessage = encodeURIComponent(
+                        `Check out this ballistic calculation:\n${fullUrl}`
+                      );
+                      const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                      window.open(whatsappUrl, "_blank");
+
+                      // Show toast
+                      toast({
+                        title: "Link Copied",
+                        description:
+                          "A shareable link to this calculation has been copied to your clipboard and opened in WhatsApp.",
+                      });
+                    }}
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
                   </Button>
                 </CardFooter>
               </Card>
@@ -1237,25 +1409,41 @@ export default function Ballistics() {
                     <Target className="h-5 w-5 mr-2 text-primary" />
                     Trajectory Table
                   </CardTitle>
-                  <CardDescription>Detailed ballistic data at various distances</CardDescription>
+                  <CardDescription>
+                    Detailed ballistic data at various distances
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="rounded-md border overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-muted/50 border-b">
-                          <th className="px-4 py-2 text-left font-medium">Distance (yd)</th>
-                          <th className="px-4 py-2 text-left font-medium">Drop (in)</th>
-                          <th className="px-4 py-2 text-left font-medium">Windage (in)</th>
-                          <th className="px-4 py-2 text-left font-medium">Velocity (fps)</th>
-                          <th className="px-4 py-2 text-left font-medium">Energy (ft-lb)</th>
-                          <th className="px-4 py-2 text-left font-medium">Time (s)</th>
+                          <th className="px-4 py-2 text-left font-medium">
+                            Distance (yd)
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium">
+                            Drop (in)
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium">
+                            Windage (in)
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium">
+                            Velocity (fps)
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium">
+                            Energy (ft-lb)
+                          </th>
+                          <th className="px-4 py-2 text-left font-medium">
+                            Time (s)
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {trajectoryData
                           .filter(
-                            (point) => point.distance % 50 === 0 || point.distance === zeroRange
+                            (point) =>
+                              point.distance % 50 === 0 ||
+                              point.distance === zeroRange
                           )
                           .map((point, index) => (
                             <tr
@@ -1287,10 +1475,18 @@ export default function Ballistics() {
                                   <ArrowDown className="inline ml-1 h-3 w-3 text-red-500" />
                                 ) : null}
                               </td>
-                              <td className="px-4 py-2">{formatDecimal(point.windage)}</td>
-                              <td className="px-4 py-2">{Math.round(point.velocity)}</td>
-                              <td className="px-4 py-2">{Math.round(point.energy)}</td>
-                              <td className="px-4 py-2">{formatDecimal(point.time)}</td>
+                              <td className="px-4 py-2">
+                                {formatDecimal(point.windage)}
+                              </td>
+                              <td className="px-4 py-2">
+                                {Math.round(point.velocity)}
+                              </td>
+                              <td className="px-4 py-2">
+                                {Math.round(point.energy)}
+                              </td>
+                              <td className="px-4 py-2">
+                                {formatDecimal(point.time)}
+                              </td>
                             </tr>
                           ))}
                       </tbody>
@@ -1315,11 +1511,14 @@ export default function Ballistics() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground text-center max-w-md">
-              This ballistics calculator provides estimated values for educational purposes only.
-              Always verify results with live fire testing for critical shooting applications.
+              This ballistics calculator provides estimated values for
+              educational purposes only. Always verify results with live fire
+              testing for critical shooting applications.
             </p>
             <Separator className="my-4 max-w-xs" />
-            <p className="text-xs text-muted-foreground">© 2023 AmmoAlley. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground">
+              © 2023 AmmoAlley. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
