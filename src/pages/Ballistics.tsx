@@ -1159,7 +1159,7 @@ export default function Ballistics() {
                     <Download className="mr-2 h-4 w-4" />
                     Export Data
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
@@ -1179,6 +1179,43 @@ export default function Ballistics() {
                         title: "Link Copied",
                         description:
                           "A shareable link to this calculation has been copied to your clipboard.",
+                      });
+                    }}
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </Button> */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Create shareable URL
+                      const params = new URLSearchParams({
+                        bt: selectedBulletType,
+                        zr: zeroRange.toString(),
+                        ws: windSpeed.toString(),
+                        wa: windAngle.toString(),
+                      });
+                      const basePath = "/tacnet";
+                      const fullUrl = `${
+                        window.location.origin
+                      }${basePath}/ballistics?${params.toString()}`;
+
+                      // Copy to clipboard
+                      navigator.clipboard.writeText(fullUrl);
+
+                      // Open WhatsApp share URL
+                      const encodedMessage = encodeURIComponent(
+                        `Check out this ballistic calculation:\n${fullUrl}`
+                      );
+                      const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                      window.open(whatsappUrl, "_blank");
+
+                      // Show toast
+                      toast({
+                        title: "Link Copied",
+                        description:
+                          "A shareable link to this calculation has been copied to your clipboard and opened in WhatsApp.",
                       });
                     }}
                   >
