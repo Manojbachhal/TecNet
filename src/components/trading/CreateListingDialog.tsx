@@ -56,7 +56,6 @@ const CreateListingDialog = ({
   const navigate = useNavigate();
   const showNoInventoryDialog = isOpen && !editItem && userFirearms.length === 0 && !initialFirearm;
   console.log(editItem, "editItem");
-
   useEffect(() => {
     if (editItem) {
       setTitle(editItem.title);

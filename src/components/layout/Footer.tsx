@@ -183,14 +183,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center text-xs text-muted-foreground">
           <p>© {currentYear} TacNet™ | All Rights Reserved</p>
           <p className="mt-2 md:mt-0 flex items-center">
-            <a
-              href="https://github.com/tacnet"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-1 inline-flex items-center hover:text-primary"
-            >
-              <Github className="h-3 w-3 mr-1" /> TacNet Team
-            </a>
+            <Github className="h-3 w-3 mr-1" /> TacNet Team
           </p>
         </div>
       </div>
