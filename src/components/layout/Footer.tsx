@@ -185,9 +185,9 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center text-xs text-muted-foreground">
           <p>© {currentYear} TacNet™ | All Rights Reserved</p>
-          <p className="mt-2 md:mt-0 flex items-center">
+          {/* <p className="mt-2 md:mt-0 flex items-center">
             <Github className="h-3 w-3 mr-1" /> TacNet Team
-          </p>
+          </p> */}
         </div>
       </div>
     </footer>
